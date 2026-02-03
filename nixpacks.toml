@@ -10,9 +10,8 @@ cmds = [
 
 [phases.build]
 cmds = [
-  "mkdir -p logs app/static/uploads/images app/static/uploads/videos",
-  "chmod +x start.sh"
+  "mkdir -p logs app/static/uploads/images app/static/uploads/videos"
 ]
 
 [start]
-cmd = "./start.sh"
+cmd = "python start.py"
