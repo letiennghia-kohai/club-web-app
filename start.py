@@ -6,17 +6,28 @@ import sys
 
 print("=== Starting Railway Deployment ===")
 
-# Run migrations
-print("Running database migrations...")
-result = subprocess.run([sys.executable, "-m", "flask", "db", "upgrade"], capture_output=False)
-if result.returncode != 0:
-    print("Warning: Migration failed, but continuing...")
-
-# Seed database
-print("Seeding database...")
-result = subprocess.run([sys.executable, "-m", "flask", "seed-db"], capture_output=False)
-if result.returncode != 0:
-    print("Warning: Seeding failed (data may already exist), continuing...")
+# Initialize database if needed
+print("Checking database...")
+try:
+    from app import create_app, db
+    from app.utils.seed import seed_data
+    
+    app = create_app()
+    with app.app_context():
+        # Try to create tables (will skip if already exist)
+        db.create_all()
+        print("✅ Database tables ready")
+        
+        # Try to seed data (will skip if already exists)
+        try:
+            seed_data()
+            print("✅ Initial data seeded")
+        except Exception as e:
+            print(f"ℹ️  Seed skipped (data may already exist): {e}")
+            
+except Exception as e:
+    print(f"⚠️  Database check failed: {e}")
+    print("Will try to start anyway...")
 
 # Start Gunicorn
 print("Starting Gunicorn...")
