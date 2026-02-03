@@ -1,0 +1,9 @@
+# Ignore Railway config files (use Settings UI instead)
+railway.toml
+nixpacks.toml
+
+# Ignore troubleshooting files
+RAILWAY_TROUBLESHOOTING.md
+build.sh
+entrypoint.sh
+render.yaml
