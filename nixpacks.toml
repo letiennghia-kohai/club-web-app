@@ -10,7 +10,9 @@ cmds = [
 
 [phases.build]
 cmds = [
-  "mkdir -p logs app/static/uploads/images app/static/uploads/videos"
+  "mkdir -p logs app/static/uploads/images app/static/uploads/videos",
+  "python -m flask db upgrade || true",
+  "python -m flask seed-db || true"
 ]
 
 [start]
