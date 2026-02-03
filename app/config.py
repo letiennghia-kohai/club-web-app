@@ -10,6 +10,9 @@ load_dotenv()
 class Config:
     """Base configuration."""
     
+    # Club Info
+    CLUB_NAME = "Câu lạc bộ Karate-do Bách Khoa Hà Nội"
+    
     # Flask
     SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
     

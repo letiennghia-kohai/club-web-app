@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+
+{% block title %}Liên hệ - {{ config.CLUB_NAME }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <!-- Header -->
+            <div class="text-center mb-5">
+                <h1 class="display-4 mb-3">Liên hệ</h1>
+                <p class="lead text-muted">
+                    Chúng tôi luôn sẵn sàng lắng nghe và hỗ trợ bạn
+                </p>
+            </div>
+
+            <!-- Contact Info Cards -->
+            <div class="row g-4 mb-5">
+                <!-- Địa chỉ -->
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm hover-lift">
+                        <div class="card-body text-center p-4">
+                            <div class="mb-3">
+                                <i class="bi bi-geo-alt-fill text-primary" style="font-size: 2.5rem;"></i>
+                            </div>
+                            <h5 class="card-title">Địa chỉ tập luyện</h5>
+                            <p class="card-text text-muted">
+                                Nhà thi đấu A<br>
+                                Đại học Bách Khoa Hà Nội<br>
+                                Số 1 Đại Cồ Việt, Hai Bà Trưng, Hà Nội
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Số điện thoại -->
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm hover-lift">
+                        <div class="card-body text-center p-4">
+                            <div class="mb-3">
+                                <i class="bi bi-telephone-fill text-success" style="font-size: 2.5rem;"></i>
+                            </div>
+                            <h5 class="card-title">Số điện thoại</h5>
+                            <p class="card-text">
+                                <a href="tel:+84123456789" class="text-decoration-none text-muted">
+                                    (+84) 123 456 789
+                                </a>
+                            </p>
+                            <p class="card-text text-muted small">
+                                Thứ 2 - Thứ 6: 18:00 - 20:00
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Facebook/Fanpage -->
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm hover-lift">
+                        <div class="card-body text-center p-4">
+                            <div class="mb-3">
+                                <i class="bi bi-facebook text-primary" style="font-size: 2.5rem;"></i>
+                            </div>
+                            <h5 class="card-title">Fanpage</h5>
+                            <p class="card-text">
+                                <a href="https://facebook.com/karatedobachkhoa" target="_blank"
+                                    class="text-decoration-none text-primary">
+                                    <i class="bi bi-facebook"></i> @karatedobachkhoa
+                                </a>
+                            </p>
+                            <p class="card-text text-muted small">
+                                Theo dõi để cập nhật tin tức mới nhất
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Email Contact -->
+            <div class="card border-0 shadow-sm mb-5">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-2 text-center mb-3 mb-md-0">
+                            <i class="bi bi-envelope-fill text-danger" style="font-size: 3rem;"></i>
+                        </div>
+                        <div class="col-md-10">
+                            <h5 class="mb-2">Email liên hệ</h5>
+                            <p class="mb-1">
+                                <a href="mailto:karate@hust.edu.vn" class="text-decoration-none">
+                                    karate@hust.edu.vn
+                                </a>
+                            </p>
+                            <p class="text-muted small mb-0">
+                                Gửi email cho chúng tôi bất cứ lúc nào, chúng tôi sẽ phản hồi trong vòng 24 giờ
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Training Schedule -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-clock"></i> Lịch tập luyện
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-borderless mb-0">
+                            <tbody>
+                                <tr>
+                                    <td class="fw-bold" style="width: 30%;">Thứ 2, 4, 6</td>
+                                    <td>18:00 - 20:00</td>
+                                    <td class="text-muted">Nhà thi đấu A</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Thứ 7</td>
+                                    <td>14:00 - 16:00</td>
+                                    <td class="text-muted">Nhà thi đấu A</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Chủ nhật</td>
+                                    <td>09:00 - 11:00</td>
+                                    <td class="text-muted">Nhà thi đấu A</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Map (optional) -->
+            <div class="mt-5">
+                <h4 class="mb-3">Bản đồ</h4>
+                <div class="ratio ratio-16x9 rounded overflow-hidden shadow-sm">
+                    <iframe
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3724.4967324945827!2d105.84138731476282!3d21.00489199365434!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3135ac76ccab0e63%3A0x5e6e596131245f37!2zVHLGsOG7nW5nIMSQ4bqhaSBo4buNYyBCw6FjaCBraG9hIEjDoCBO4buZaQ!5e0!3m2!1svi!2s!4v1706849999999!5m2!1svi!2s"
+                        style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hover-lift {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .hover-lift:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    }
+
+    .card-header.bg-primary {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)) !important;
+    }
+</style>
+{% endblock %}

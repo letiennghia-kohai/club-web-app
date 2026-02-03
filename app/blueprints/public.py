@@ -96,6 +96,12 @@ def about():
     return render_template('public/about.html')
 
 
+@public_bp.route('/contact')
+def contact():
+    """Contact page."""
+    return render_template('public/contact.html')
+
+
 @public_bp.route('/search')
 def search():
     """Search posts."""

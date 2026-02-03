@@ -22,6 +22,9 @@ class Post(db.Model):
     content = db.Column(db.Text, nullable=False)
     status = db.Column(db.String(20), nullable=False, default=PostStatus.DRAFT, index=True)
     
+    # Category
+    category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=True, index=True)
+    
     # Author
     author_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False, index=True)
     

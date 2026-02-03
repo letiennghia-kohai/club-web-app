@@ -105,17 +105,21 @@ def format_file_size(bytes_size):
 
 
 def get_belt_color_class(belt):
-    """Get CSS class for belt color."""
+    """Get CSS class for belt color based on Kyu system."""
+    if not belt:
+        return 'belt-default'
+    
     belt_colors = {
-        'Trắng': 'belt-white',
-        'Vàng': 'belt-yellow',
-        'Xanh nhạt': 'belt-light-blue',
-        'Xanh lá cây': 'belt-green',
-        'Xanh đậm kuy2': 'belt-dark-blue-kuy2',
-        'Xanh đậm kuy1': 'belt-dark-blue-kuy1',
-        'Nâu kuy3': 'belt-brown-kuy3',
-        'Nâu kuy2': 'belt-brown-kuy2',
-        'Nâu kuy1': 'belt-brown-kuy1',
+        'Kuy 10': 'belt-kuy-10',
+        'Kuy 9': 'belt-kuy-9',
+        'Kuy 8': 'belt-kuy-8',
+        'Kuy 7': 'belt-kuy-7',
+        'Kuy 6': 'belt-kuy-6',
+        'Kuy 5': 'belt-kuy-5',
+        'Kuy 4': 'belt-kuy-4',
+        'Kuy 3': 'belt-kuy-3',
+        'Kuy 2': 'belt-kuy-2',
+        'Kuy 1': 'belt-kuy-1',
         'Đen': 'belt-black',
     }
     return belt_colors.get(belt, 'belt-default')

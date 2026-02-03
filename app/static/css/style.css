@@ -277,60 +277,84 @@ h3 {
     padding: 0.35rem 0.75rem;
 }
 
-/* Belt Colors */
-.belt-white {
-    background-color: #FFFFFF;
-    color: #000000;
-    border: 2px solid #000000;
+/* Belt Colors - Kyu System */
+/* Gradient from beginner (light) to advanced (dark) */
+
+.belt-kuy-10 {
+    background: linear-gradient(135deg, #FFE5E5, #FFB3B3);
+    color: #8B0000;
+    font-weight: 600;
 }
 
-.belt-yellow {
-    background-color: #FFD700;
-    color: #000000;
+.belt-kuy-9 {
+    background: linear-gradient(135deg, #FFF5CC, #FFE699);
+    color: #B8860B;
+    font-weight: 600;
 }
 
-.belt-light-blue {
-    background-color: #87CEEB;
-    color: #000000;
+.belt-kuy-8 {
+    background: linear-gradient(135deg, #E6F7FF, #B3E0FF);
+    color: #003D6B;
+    font-weight: 600;
 }
 
-.belt-green {
-    background-color: #228B22;
+.belt-kuy-7 {
+    background: linear-gradient(135deg, #D4F1F4, #8DE4E8);
+    color: #006080;
+    font-weight: 600;
+}
+
+.belt-kuy-6 {
+    background: linear-gradient(135deg, #90EE90, #66CC66);
+    color: #004D00;
+    font-weight: 600;
+}
+
+.belt-kuy-5 {
+    background: linear-gradient(135deg, #228B22, #1A6B1A);
     color: #FFFFFF;
+    font-weight: 600;
 }
 
-.belt-dark-blue-kuy2 {
-    background-color: #003D6B;
+.belt-kuy-4 {
+    background: linear-gradient(135deg, #4169E1, #2952CC);
     color: #FFFFFF;
+    font-weight: 600;
+}
+
+.belt-kuy-3 {
+    background: linear-gradient(135deg, #003D6B, #002D52);
+    color: #FFFFFF;
+    font-weight: 600;
     border: 2px solid #FFD700;
 }
 
-.belt-dark-blue-kuy1 {
-    background-color: #002D52;
+.belt-kuy-2 {
+    background: linear-gradient(135deg, #8B4513, #654321);
     color: #FFFFFF;
+    font-weight: 600;
     border: 2px solid #FFD700;
 }
 
-.belt-brown-kuy3 {
-    background-color: #8B4513;
+.belt-kuy-1 {
+    background: linear-gradient(135deg, #654321, #4A2511);
     color: #FFFFFF;
-}
-
-.belt-brown-kuy2 {
-    background-color: #654321;
-    color: #FFFFFF;
-    border: 2px solid #FFD700;
-}
-
-.belt-brown-kuy1 {
-    background-color: #4A2511;
-    color: #FFFFFF;
+    font-weight: 600;
     border: 2px solid #FFD700;
 }
 
 .belt-black {
-    background-color: #000000;
-    color: #FFFFFF;
+    background: linear-gradient(135deg, #000000, #1A1A1A);
+    color: #FFD700;
+    font-weight: 700;
+    border: 2px solid #FFD700;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.belt-default {
+    background-color: #E9ECEF;
+    color: #6C757D;
+    font-weight: 500;
 }
 
 /* Forms */

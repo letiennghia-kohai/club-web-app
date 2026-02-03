@@ -6,18 +6,19 @@ from app import db
 from enum import Enum
 
 
-# Belt progression order (from lowest to highest)
+# Belt progression order - Kyu system (from lowest to highest)
 BELT_ORDER = [
-    'Trắng',
-    'Vàng',
-    'Xanh nhạt',
-    'Xanh lá cây',
-    'Xanh đậm kuy2',
-    'Xanh đậm kuy1',
-    'Nâu kuy3',
-    'Nâu kuy2',
-    'Nâu kuy1',
-    'Đen'
+    'Kuy 10',  # Beginner
+    'Kuy 9',
+    'Kuy 8',
+    'Kuy 7',
+    'Kuy 6',
+    'Kuy 5',
+    'Kuy 4',
+    'Kuy 3',
+    'Kuy 2',
+    'Kuy 1',
+    'Đen'  # Black belt
 ]
 
 
@@ -47,8 +48,11 @@ class User(UserMixin, db.Model):
     full_name = db.Column(db.String(120), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=True)
     student_id = db.Column(db.String(20), unique=True, nullable=True)
-    belt = db.Column(db.String(50), nullable=True)  # Cấp đai
-    join_date = db.Column(db.Date, nullable=True)
+    belt = db.Column(db.String(50), nullable=True)  # Cấp đai/Kyu
+    date_of_birth = db.Column(db.Date, nullable=True)  # Ngày sinh
+    phone_number = db.Column(db.String(15), nullable=True)  # Số điện thoại
+    facebook_link = db.Column(db.String(255), nullable=True)  # Facebook/Social media
+    join_date = db.Column(db.Date, nullable=True)  # Ngày gia nhập
     status = db.Column(db.String(20), nullable=False, default=UserStatus.ACTIVE)
     
     # Timestamps

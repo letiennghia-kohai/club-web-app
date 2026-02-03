@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description"
-        content="{% block meta_description %}CLB Karate Bách Khoa - Câu lạc bộ võ thuật hàng đầu{% endblock %}">
-    <title>{% block title %}CLB Karate Bách Khoa{% endblock %}</title>
+        content="{% block meta_description %}Câu lạc bộ Karate-do Bách Khoa Hà Nội - Nơi rèn luyện võ thuật hàng đầu{% endblock %}">
+    <title>{% block title %}Câu lạc bộ Karate-do Bách Khoa Hà Nội{% endblock %}</title>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -30,7 +30,7 @@
     <nav class="navbar navbar-expand-lg navbar-light sticky-top">
         <div class="container">
             <a class="navbar-brand fw-bold" href="{{ url_for('public.index') }}">
-                <span class="gradient-text">CLB Karatedo Bách Khoa Hà Nội</span>
+                <span class="gradient-text">Câu lạc bộ Karate-do Bách Khoa Hà Nội</span>
             </a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -49,6 +49,12 @@
                         <a class="nav-link {% if request.endpoint == 'public.about' %}active{% endif %}"
                             href="{{ url_for('public.about') }}">
                             <i class="bi bi-info-circle"></i> Giới thiệu
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'public.contact' %}active{% endif %}"
+                            href="{{ url_for('public.contact') }}">
+                            <i class="bi bi-telephone"></i> Liên hệ
                         </a>
                     </li>
 
@@ -131,7 +137,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-4 mb-4">
-                    <h5 class="mb-3">CLB Karate Bách Khoa</h5>
+                    <h5 class="mb-3">Câu lạc bộ Karate-do Bách Khoa Hà Nội</h5>
                     <p class="text-muted">
                         Câu lạc bộ võ thuật hàng đầu tại Đại học Bách Khoa,
                         nơi rèn luyện thể chất và tinh thần võ đạo.
@@ -165,7 +171,7 @@
             <div class="row">
                 <div class="col-12 text-center">
                     <p class="text-muted mb-0">
-                    <p class="mb-0">&copy; 2024 CLB Karatedo Bách Khoa Hà Nội. All rights reserved.</p>
+                    <p class="mb-0">&copy; 2024 Câu lạc bộ Karate-do Bách Khoa Hà Nội. All rights reserved.</p>
                     </p>
                 </div>
             </div>

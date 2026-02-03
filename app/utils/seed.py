@@ -23,7 +23,7 @@ def seed_data():
             email=admin_email,
             role=UserRole.ADMIN,
             status=UserStatus.ACTIVE,
-            belt='Đen',
+            belt='Đen',  # Black belt for admin
             join_date=date(2020, 1, 1)
         )
         admin.set_password(admin_password)
@@ -38,7 +38,7 @@ def seed_data():
             'full_name': 'Nguyễn Văn A',
             'email': 'nguyenvana@example.com',
             'student_id': '20210001',
-            'belt': 'Xanh đậm kuy1',
+            'belt': 'Kuy 3',  # Advanced level
             'join_date': date(2021, 9, 1)
         },
         {
@@ -47,7 +47,7 @@ def seed_data():
             'full_name': 'Trần Thị B',
             'email': 'tranthib@example.com',
             'student_id': '20210002',
-            'belt': 'Nâu kuy2',
+            'belt': 'Kuy 5',  # Intermediate level
             'join_date': date(2021, 9, 1)
         },
         {
@@ -56,7 +56,7 @@ def seed_data():
             'full_name': 'Lê Văn C',
             'email': 'levanc@example.com',
             'student_id': '20220001',
-            'belt': 'Xanh lá cây',
+            'belt': 'Kuy 8',  # Beginner level
             'join_date': date(2022, 9, 1)
         }
     ]
