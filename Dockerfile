@@ -31,5 +31,6 @@ USER appuser
 # Expose port (Railway will override with $PORT)
 EXPOSE 8000
 
-# Use entrypoint script with bash
-ENTRYPOINT ["/bin/bash", "./entrypoint.sh"]
+# Use CMD instead of ENTRYPOINT so Railway Start Command can override
+# ENTRYPOINT ["/bin/bash", "./entrypoint.sh"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "4", "--timeout", "120", "wsgi:application"]
