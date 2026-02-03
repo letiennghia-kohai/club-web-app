@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+
+{% block title %}Bảng điều khiển - Admin{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1><i class="bi bi-speedometer2"></i> Bảng điều khiển Admin</h1>
+                    <p class="text-muted">Tổng quan hệ thống</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('admin.create_post') }}" class="btn btn-warning btn-lg">
+                        <i class="bi bi-plus-circle-fill"></i> Đăng bài mới
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="bi bi-people"></i>
+                </div>
+                <div class="stat-value">{{ stats.total_members }}</div>
+                <div class="stat-label">Thành viên</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: var(--gradient-dark);">
+                    <i class="bi bi-file-earmark-text"></i>
+                </div>
+                <div class="stat-value">{{ stats.total_posts }}</div>
+                <div class="stat-label">Tổng bài viết</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
+                    <i class="bi bi-check-circle"></i>
+                </div>
+                <div class="stat-value">{{ stats.published_posts }}</div>
+                <div class="stat-label">Đã công khai</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+                <div class="stat-value">{{ stats.pending_posts }}</div>
+                <div class="stat-label">Chờ duyệt</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Pending Posts -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-clock-history"></i> Bài viết chờ duyệt</h5>
+                    <a href="{{ url_for('admin.posts_pending') }}" class="btn btn-sm btn-outline-primary">
+                        Xem tất cả
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if recent_pending %}
+                    <div class="list-group list-group-flush">
+                        {% for post in recent_pending %}
+                        <div class="list-group-item px-0">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">{{ post.title }}</h6>
+                                    <small class="text-muted">
+                                        <i class="bi bi-person"></i> {{ post.author.full_name }} •
+                                        <i class="bi bi-calendar"></i> {{ post.created_at.strftime('%d/%m/%Y %H:%M') }}
+                                    </small>
+                                </div>
+                                <div>
+                                    <a href="{{ url_for('public.post_detail', post_id=post.id) }}"
+                                        class="btn btn-sm btn-outline-primary me-2">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <form method="POST" action="{{ url_for('admin.approve_post', post_id=post.id) }}"
+                                        style="display: inline;">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                                        <button type="submit" class="btn btn-sm btn-success">
+                                            <i class="bi bi-check"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-inbox display-4"></i>
+                        <p class="mt-2">Không có bài viết chờ duyệt</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Members -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-people"></i> Thành viên mới</h5>
+                    <a href="{{ url_for('admin.users') }}" class="btn btn-sm btn-outline-primary">
+                        Xem tất cả
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if recent_members %}
+                    <div class="list-group list-group-flush">
+                        {% for user in recent_members %}
+                        <div class="list-group-item px-0">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0">
+                                    <div
+                                        style="width: 40px; height: 40px; border-radius: 50%; background: var(--gradient-primary); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                                        {{ user.full_name[0] }}
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="mb-0">{{ user.full_name }}</h6>
+                                    <small class="text-muted">
+                                        {% if user.belt %}
+                                        <span class="badge belt-{{ user.belt|lower|replace(' ', '-') }}">
+                                            {{ user.belt }}
+                                        </span>
+                                        {% endif %}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-person-x display-4"></i>
+                        <p class="mt-2">Chưa có thành viên mới</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mt-4">
+        <div class="col">
+            <h4 class="mb-3"><i class="bi bi-lightning"></i> Truy cập nhanh</h4>
+            <div class="d-flex gap-2 flex-wrap">
+                <a href="{{ url_for('admin.create_post') }}" class="btn btn-warning">
+                    <i class="bi bi-plus-circle-fill"></i> Đăng bài mới
+                </a>
+                <a href="{{ url_for('admin.posts_pending') }}" class="btn btn-outline-warning">
+                    <i class="bi bi-clock-history"></i> Duyệt bài ({{ stats.pending_posts }})
+                </a>
+                <a href="{{ url_for('admin.users') }}" class="btn btn-primary">
+                    <i class="bi bi-people"></i> Quản lý người dùng
+                </a>
+                <a href="{{ url_for('admin.promotions') }}" class="btn btn-success">
+                    <i class="bi bi-award"></i> Thăng đai
+                </a>
+                <a href="{{ url_for('admin.posts_all') }}" class="btn btn-secondary">
+                    <i class="bi bi-file-earmark-text"></i> Tất cả bài viết
+                </a>
+                <a href="{{ url_for('admin.comments') }}" class="btn btn-info">
+                    <i class="bi bi-chat-dots"></i> Quản lý bình luận
+                </a>
+                <a href="{{ url_for('admin.create_user') }}" class="btn btn-outline-success">
+                    <i class="bi bi-person-plus"></i> Thêm người dùng
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

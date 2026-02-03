@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block title %}Trang chủ - CLB Karatedo Bách Khoa Hà Nội{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+    <div class="container hero-content">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="display-3 fw-bold mb-4 gradient-text">CLB Karatedo Bách Khoa Hà Nội</h1>
+                <p class="lead mb-4 fade-in">
+                    Khơi nguồn sức mạnh - Rèn luyện tinh thần - Xây dựng tương lai
+                </p>
+                <div class="d-flex gap-3 flex-wrap fade-in">
+                    {% if not current_user.is_authenticated %}
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-light btn-lg">
+                        <i class="bi bi-box-arrow-in-right"></i> Đăng nhập
+                    </a>
+                    {% else %}
+                    {% if current_user.is_member() %}
+                    <a href="{{ url_for('member.create_post') }}" class="btn btn-light btn-lg">
+                        <i class="bi bi-plus-circle"></i> Đăng bài mới
+                    </a>
+                    {% endif %}
+                    {% endif %}
+                    <a href="{{ url_for('public.about') }}" class="btn btn-outline-light btn-lg">
+                        <i class="bi bi-info-circle"></i> Tìm hiểu thêm
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Posts Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h2><i class="bi bi-newspaper"></i> Tin tức & Hoạt động</h2>
+                <p class="text-muted">Cập nhật những hoạt động mới nhất của câu lạc bộ</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <form action="{{ url_for('public.search') }}" method="GET" class="d-flex">
+                    <input type="search" name="q" class="form-control" placeholder="Tìm kiếm bài viết...">
+                    <button type="submit" class="btn btn-primary ms-2">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        {% if posts %}
+        <div class="row g-4">
+            {% for post in posts %}
+            <div class="col-md-4">
+                <div class="card post-card fade-in {% if post.is_admin_post() %}admin-post-card{% endif %}">
+                    {% if post.is_admin_post() %}
+                    <span class="admin-post-badge">
+                        <i class="bi bi-star-fill"></i> BAN QUẢN TRỊ
+                    </span>
+                    {% endif %}
+
+                    {% set images = post.get_media_images() %}
+                    {% if images %}
+                    <img src="{{ url_for('static', filename='uploads/' + images[0].file_path) }}"
+                        class="post-card-image" alt="{{ post.title }}">
+                    {% else %}
+                    <div class="post-card-image" style="background: var(--gradient-primary);"></div>
+                    {% endif %}
+
+                    <div class="card-body post-card-body">
+                        <h5 class="post-card-title">{{ post.title }}</h5>
+                        <p class="post-card-excerpt">
+                            {{ post.content[:150] }}{% if post.content|length > 150 %}...{% endif %}
+                        </p>
+
+                        <div class="post-meta">
+                            <span>
+                                <i class="bi bi-person"></i> {{ post.author.full_name }}
+                                {% if post.is_admin_post() %}
+                                <span class="admin-author-badge"><i class="bi bi-shield-fill-check"></i> ADMIN</span>
+                                {% endif %}
+                            </span>
+                            <span><i class="bi bi-calendar"></i> {{ post.published_at.strftime('%d/%m/%Y') if
+                                post.published_at else '' }}</span>
+                        </div>
+
+                        <a href="{{ url_for('public.post_detail', post_id=post.id) }}"
+                            class="btn btn-primary w-100 mt-3">
+                            Đọc tiếp <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if pagination and pagination.pages > 1 %}
+        <nav aria-label="Page navigation" class="mt-5">
+            <ul class="pagination justify-content-center">
+                <!-- Previous -->
+                <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+                    <a class="page-link"
+                        href="{{ url_for('public.index', page=pagination.prev_num) if pagination.has_prev else '#' }}">
+                        <i class="bi bi-chevron-left"></i> Trước
+                    </a>
+                </li>
+
+                <!-- Page numbers -->
+                {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                {% if page_num %}
+                <li class="page-item {% if page_num == pagination.page %}active{% endif %}">
+                    <a class="page-link" href="{{ url_for('public.index', page=page_num) }}">{{ page_num }}</a>
+                </li>
+                {% else %}
+                <li class="page-item disabled"><span class="page-link">...</span></li>
+                {% endif %}
+                {% endfor %}
+
+                <!-- Next -->
+                <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+                    <a class="page-link"
+                        href="{{ url_for('public.index', page=pagination.next_num) if pagination.has_next else '#' }}">
+                        Sau <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        {% endif %}
+
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-inbox display-1 text-muted"></i>
+            <p class="text-muted mt-3">Chưa có bài viết nào</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5 bg-light">
+    <div class="container text-center">
+        <h2 class="mb-3">Tham gia cùng chúng tôi</h2>
+        <p class="lead text-muted mb-4">
+            Hãy đến và trải nghiệm môn võ thuật Karate truyền thống tại CLB
+        </p>
+        <a href="{{ url_for('public.about') }}" class="btn btn-primary btn-lg">
+            Tìm hiểu thêm <i class="bi bi-arrow-right"></i>
+        </a>
+    </div>
+</section>
+{% endblock %}

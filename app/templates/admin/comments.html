@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}Quản lý bình luận - Admin{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col">
+            <h2><i class="bi bi-chat-dots"></i> Quản lý bình luận</h2>
+        </div>
+    </div>
+
+    <!-- Search Form -->
+    <form method="GET" class="mb-4">
+        <div class="input-group">
+            <input type="text" name="search" class="form-control"
+                placeholder="Tìm theo nội dung hoặc tên người bình luận..." value="{{ search_query or '' }}">
+            <button class="btn btn-primary" type="submit">
+                <i class="bi bi-search"></i> Tìm kiếm
+            </button>
+            {% if search_query %}
+            <a href="{{ url_for('admin.comments') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-x"></i> Xóa
+            </a>
+            {% endif %}
+        </div>
+    </form>
+
+    {% if comments %}
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Bài viết</th>
+                        <th>Người bình luận</th>
+                        <th>Nội dung</th>
+                        <th>Ngày</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for comment in comments %}
+                    <tr>
+                        <td>
+                            <a href="{{ url_for('public.post_detail', post_id=comment.post_id) }}">
+                                {{ comment.post.title[:50] }}...
+                            </a>
+                        </td>
+                        <td>
+                            {{ comment.get_author_name() }}
+                            {% if comment.is_guest_comment() %}
+                            <span class="badge bg-secondary">Khách</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ comment.content[:100] }}{% if comment.content|length > 100 %}...{% endif %}</td>
+                        <td>{{ comment.created_at.strftime('%d/%m/%Y') }}</td>
+                        <td>
+                            <form method="POST" action="{{ url_for('admin.delete_comment', comment_id=comment.id) }}"
+                                style="display: inline;" onsubmit="return confirm('Xóa bình luận này?');">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash"></i> Xóa
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if pagination and pagination.pages > 1 %}
+    <nav aria-label="Page navigation" class="mt-4">
+        <ul class="pagination justify-content-center">
+            <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+                <a class="page-link"
+                    href="{{ url_for('admin.comments', search=search_query, page=pagination.prev_num) if pagination.has_prev else '#' }}">
+                    <i class="bi bi-chevron-left"></i> Trước
+                </a>
+            </li>
+
+            {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+            {% if page_num %}
+            <li class="page-item {% if page_num == pagination.page %}active{% endif %}">
+                <a class="page-link" href="{{ url_for('admin.comments', search=search_query, page=page_num) }}">{{
+                    page_num }}</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled"><span class="page-link">...</span></li>
+            {% endif %}
+            {% endfor %}
+
+            <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+                <a class="page-link"
+                    href="{{ url_for('admin.comments', search=search_query, page=pagination.next_num) if pagination.has_next else '#' }}">
+                    Sau <i class="bi bi-chevron-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    {% endif %}
+
+    {% else %}
+    <div class="card glass-card">
+        <div class="card-body text-center py-5">
+            <i class="bi bi-chat display-1 text-muted"></i>
+            <p class="text-muted mt-3">Chưa có bình luận nào</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

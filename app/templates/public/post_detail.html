@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+
+{% block title %}{{ post.title }} - CLB Karatedo Bách Khoa Hà Nội{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Post Content -->
+            <article class="card glass-card fade-in mb-4">
+                <div class="card-body p-4">
+                    <h1 class="mb-3">{{ post.title }}</h1>
+
+                    <div class="post-meta mb-4">
+                        <span>
+                            <i class="bi bi-person"></i> {{ post.author.full_name }}
+                            {% if post.is_admin_post() %}
+                            <span class="admin-author-badge"><i class="bi bi-shield-fill-check"></i> BAN QUẢN TRỊ</span>
+                            {% endif %}
+                        </span>
+                        <span><i class="bi bi-calendar"></i> {{ post.published_at.strftime('%d/%m/%Y %H:%M') if
+                            post.published_at else post.created_at.strftime('%d/%m/%Y %H:%M') }}</span>
+                        {% if current_user.is_authenticated and (current_user.is_admin() or current_user.id ==
+                        post.author_id) %}
+                        <span><i class="bi bi-eye"></i> {{ post.status }}</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Post Images -->
+                    {% set images = post.get_media_images() %}
+                    {% if images %}
+                    <div class="mb-4">
+                        {% if images|length == 1 %}
+                        <img src="{{ url_for('static', filename='uploads/' + images[0].file_path) }}"
+                            class="img-fluid rounded" alt="{{ post.title }}" style="width: 100%;">
+                        {% else %}
+                        <div id="postCarousel" class="carousel slide" data-bs-ride="carousel">
+                            <div class="carousel-inner">
+                                {% for img in images %}
+                                <div class="carousel-item {% if loop.first %}active{% endif %}">
+                                    <img src="{{ url_for('static', filename='uploads/' + img.file_path) }}"
+                                        class="d-block w-100 rounded" alt="{{ post.title }}">
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% if images|length > 1 %}
+                            <button class="carousel-control-prev" type="button" data-bs-target="#postCarousel"
+                                data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#postCarousel"
+                                data-bs-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            </button>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    <!-- Post Content (Markdown) -->
+                    <div class="markdown-content">
+                        {{ post.content|markdown|safe }}
+                    </div>
+
+                    <!-- Post Videos -->
+                    {% set videos = post.get_media_videos() %}
+                    {% if videos %}
+                    <div class="mt-4">
+                        <h5>Video</h5>
+                        {% for video in videos %}
+                        {% if video.embed_html %}
+                        <div class="ratio ratio-16x9 mb-3">
+                            {{ video.embed_html|safe }}
+                        </div>
+                        {% elif video.file_path %}
+                        <video controls class="w-100 rounded mb-3">
+                            <source src="{{ url_for('static', filename='uploads/' + video.file_path) }}"
+                                type="{{ video.mime_type }}">
+                            Trình duyệt của bạn không hỗ trợ video.
+                        </video>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <!-- Edit/Delete buttons for author and admin -->
+                    {% if current_user.is_authenticated and post.can_edit(current_user) %}
+                    <div class="mt-4 pt-3 border-top">
+                        <a href="{{ url_for('member.edit_post', post_id=post.id) }}" class="btn btn-primary">
+                            <i class="bi bi-pencil"></i> Chỉnh sửa
+                        </a>
+                        {% if post.can_delete(current_user) %}
+                        <form method="POST" action="{{ url_for('member.delete_post', post_id=post.id) }}"
+                            style="display: inline;" onsubmit="return confirm('Bạn có chắc muốn xóa bài viết này?');">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash"></i> Xóa
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </article>
+
+            <!-- Comments Section -->
+            <div class="card glass-card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-chat-dots"></i> Bình luận ({{ comments|length }})</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Comment Form -->
+                    <form method="POST" action="{{ url_for('public.add_comment', post_id=post.id) }}" class="mb-4">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+                        {% if not current_user.is_authenticated %}
+                        <div class="mb-3">
+                            <label for="guest_name" class="form-label">Tên của bạn</label>
+                            <input type="text" class="form-control" id="guest_name" name="guest_name"
+                                placeholder="Nhập tên (tùy chọn)">
+                        </div>
+                        {% endif %}
+
+                        <div class="mb-3">
+                            <label for="content" class="form-label">Nội dung bình luận</label>
+                            <textarea class="form-control" id="content" name="content" rows="3"
+                                placeholder="Viết bình luận..." required></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-send"></i> Gửi bình luận
+                        </button>
+                    </form>
+
+                    <!-- Comments List -->
+                    {% if comments %}
+                    <div class="comments-list">
+                        {% for comment in comments %}
+                        <div class="comment-item mb-3 pb-3 border-bottom">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <strong>{{ comment.get_author_name() }}</strong>
+                                    {% if comment.is_guest_comment() %}
+                                    <span class="badge bg-secondary">Khách</span>
+                                    {% endif %}
+                                    <small class="text-muted ms-2">
+                                        {{ comment.created_at.strftime('%d/%m/%Y %H:%M') }}
+                                    </small>
+                                </div>
+                                {% if current_user.is_authenticated and comment.can_delete(current_user) %}
+                                <form method="POST"
+                                    action="{{ url_for('member.delete_comment', comment_id=comment.id) }}"
+                                    style="display: inline;" onsubmit="return confirm('Xóa bình luận này?');">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </div>
+                            <p class="mt-2 mb-0">{{ comment.content }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center py-3">Chưa có bình luận nào. Hãy là người đầu tiên!</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Author Info -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="bi bi-person"></i> Tác giả</h6>
+                </div>
+                <div class="card-body text-center">
+                    <div class="{% if post.is_admin_post() %}admin-author-avatar{% endif %}"
+                        style="width: 80px; height: 80px; margin: 0 auto 1rem; border-radius: 50%; background: var(--gradient-primary); display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem; font-weight: bold;">
+                        {{ post.author.full_name[0] }}
+                    </div>
+                    <h6>{{ post.author.full_name }}
+                        {% if post.is_admin_post() %}
+                        <br><span class="admin-author-badge mt-2"><i class="bi bi-shield-fill-check"></i> ADMIN</span>
+                        {% endif %}
+                    </h6>
+                    {% if post.author.belt %}
+                    <span class="badge belt-{{ post.author.belt|lower|replace(' ', '-') }}">
+                        {{ post.author.belt }}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Share -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="bi bi-share"></i> Chia sẻ</h6>
+                </div>
+                <div class="card-body">
+                    <a href="#" class="btn btn-outline-primary w-100 mb-2"
+                        onclick="navigator.clipboard.writeText(window.location.href); alert('Đã sao chép link!'); return false;">
+                        <i class="bi bi-link-45deg"></i> Sao chép link
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

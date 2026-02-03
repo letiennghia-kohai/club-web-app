@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Tìm kiếm - CLB Karatedo Bách Khoa Hà Nội{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col">
+            <h2><i class="bi bi-search"></i> Kết quả tìm kiếm</h2>
+            {% if query %}
+            <p class="text-muted">Tìm kiếm cho: <strong>"{{ query }}"</strong></p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Search Form -->
+    <div class="row mb-4">
+        <div class="col-md-8 mx-auto">
+            <form action="{{ url_for('public.search') }}" method="GET" class="d-flex">
+                <input type="search" name="q" class="form-control form-control-lg" placeholder="Tìm kiếm bài viết..."
+                    value="{{ query }}" required>
+                <button type="submit" class="btn btn-primary btn-lg ms-2">
+                    <i class="bi bi-search"></i> Tìm
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Results -->
+    {% if posts %}
+    <div class="row g-4">
+        {% for post in posts %}
+        <div class="col-md-6">
+            <div class="card post-card fade-in">
+                {% set images = post.get_media_images() %}
+                {% if images %}
+                <img src="{{ url_for('static', filename='uploads/' + images[0].file_path) }}" class="post-card-image"
+                    alt="{{ post.title }}">
+                {% else %}
+                <div class="post-card-image" style="background: var(--gradient-primary);"></div>
+                {% endif %}
+
+                <div class="card-body post-card-body">
+                    <h5 class="post-card-title">{{ post.title }}</h5>
+                    <p class="post-card-excerpt">
+                        {{ post.content[:200] }}{% if post.content|length > 200 %}...{% endif %}
+                    </p>
+
+                    <div class="post-meta">
+                        <span><i class="bi bi-person"></i> {{ post.author.full_name }}</span>
+                        <span><i class="bi bi-calendar"></i> {{ post.published_at.strftime('%d/%m/%Y') if
+                            post.published_at else '' }}</span>
+                    </div>
+
+                    <a href="{{ url_for('public.post_detail', post_id=post.id) }}" class="btn btn-primary w-100 mt-3">
+                        Đọc tiếp <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if pagination.pages > 1 %}
+    <nav aria-label="Page navigation" class="mt-5">
+        <ul class="pagination justify-content-center">
+            {% if pagination.has_prev %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('public.search', q=query, page=pagination.prev_num) }}">
+                    <i class="bi bi-chevron-left"></i> Trước
+                </a>
+            </li>
+            {% endif %}
+
+            {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+            {% if page_num %}
+            <li class="page-item {% if page_num == pagination.page %}active{% endif %}">
+                <a class="page-link" href="{{ url_for('public.search', q=query, page=page_num) }}">
+                    {{ page_num }}
+                </a>
+            </li>
+            {% else %}
+            <li class="page-item disabled"><span class="page-link">...</span></li>
+            {% endif %}
+            {% endfor %}
+
+            {% if pagination.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('public.search', q=query, page=pagination.next_num) }}">
+                    Sau <i class="bi bi-chevron-right"></i>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+    {% else %}
+    <div class="text-center py-5">
+        <i class="bi bi-inbox display-1 text-muted"></i>
+        <p class="text-muted mt-3">
+            {% if query %}
+            Không tìm thấy kết quả nào cho "{{ query }}"
+            {% else %}
+            Nhập từ khóa để tìm kiếm
+            {% endif %}
+        </p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

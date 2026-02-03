@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}Bài viết chờ duyệt - Admin{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col">
+            <h2><i class="bi bi-clock-history"></i> Bài viết chờ duyệt</h2>
+        </div>
+    </div>
+
+    {% if posts %}
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Tiêu đề</th>
+                        <th>Tác giả</th>
+                        <th>Ngày gửi</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for post in posts %}
+                    <tr>
+                        <td><strong>{{ post.title }}</strong></td>
+                        <td>{{ post.author.full_name }}</td>
+                        <td>{{ post.updated_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ url_for('public.post_detail', post_id=post.id) }}"
+                                    class="btn btn-outline-secondary" title="Xem">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <form method="POST" action="{{ url_for('admin.approve_post', post_id=post.id) }}"
+                                    style="display: inline;">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                                    <button type="submit" class="btn btn-success" title="Duyệt">
+                                        <i class="bi bi-check-circle"></i>
+                                    </button>
+                                </form>
+                                <button type="button" class="btn btn-danger" title="Từ chối" data-bs-toggle="modal"
+                                    data-bs-target="#rejectModal{{ post.id }}">
+                                    <i class="bi bi-x-circle"></i>
+                                </button>
+                            </div>
+
+                            <!-- Reject Modal -->
+                            <div class="modal fade" id="rejectModal{{ post.id }}" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Từ chối bài viết</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <form method="POST"
+                                            action="{{ url_for('admin.reject_post', post_id=post.id) }}">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                                            <div class="modal-body">
+                                                <p>Từ chối bài viết: <strong>{{ post.title }}</strong></p>
+                                                <div class="mb-3">
+                                                    <label for="reason{{ post.id }}" class="form-label">Lý do từ
+                                                        chối</label>
+                                                    <textarea class="form-control" id="reason{{ post.id }}"
+                                                        name="reason" rows="3" required></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary"
+                                                    data-bs-dismiss="modal">Hủy</button>
+                                                <button type="submit" class="btn btn-danger">Từ chối</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <div class="card glass-card">
+        <div class="card-body text-center py-5">
+            <i class="bi bi-inbox display-1 text-muted"></i>
+            <p class="text-muted mt-3">Không có bài viết chờ duyệt</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

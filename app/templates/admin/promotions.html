@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}Thăng đai - Admin{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col">
+            <h2><i class="bi bi-award"></i> Quản lý thăng đai</h2>
+            <p class="text-muted">Chọn các võ sinh và thăng đai hàng loạt sau khi tổ chức kỳ thi</p>
+        </div>
+    </div>
+
+    <form method="POST" action="{{ url_for('admin.bulk_promote') }}" id="promotionForm">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+        <!-- Belt selector -->
+        <div class="card mb-4 bg-success bg-opacity-10 border-success">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">
+                            <i class="bi bi-arrow-up-circle"></i> Chọn đai mới:
+                        </label>
+                        <select name="new_belt" class="form-select form-select-lg" required id="newBeltSelect">
+                            <option value="">-- Chọn đai --</option>
+                            {% for belt in belt_order %}
+                            <option value="{{ belt }}">{{ belt }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                        <button type="submit" class="btn btn-success btn-lg"
+                            onclick="return confirm('Xác nhận thăng đai cho các võ sinh đã chọn?')">
+                            <i class="bi bi-arrow-up-circle"></i> Xác nhận thăng đai
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-lg" id="selectAllBtn">
+                            <i class="bi bi-check-all"></i> Chọn tất cả
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-lg" id="deselectAllBtn">
+                            <i class="bi bi-x-square"></i> Bỏ chọn tất cả
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users grouped by belt -->
+        {% set total_selected = 0 %}
+        {% for belt, users in users_by_belt.items() %}
+        {% if users %}
+        <div class="card mb-3">
+            <div class="card-header bg-light">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <span class="badge belt-{{ belt|lower|replace(' ', '-') }} me-2">{{ belt }}</span>
+                        {{ users|length }} võ sinh
+                    </h5>
+                    <button type="button" class="btn btn-sm btn-outline-primary select-group-btn"
+                        data-belt="{{ belt }}">
+                        <i class="bi bi-check-square"></i> Chọn nhóm này
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for user in users %}
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input user-checkbox" type="checkbox" name="user_ids[]"
+                                value="{{ user.id }}" id="user{{ user.id }}" data-belt="{{ belt }}">
+                            <label class="form-check-label" for="user{{ user.id }}">
+                                <strong>{{ user.full_name }}</strong>
+                                {% if user.student_id %}
+                                <br><small class="text-muted">MSSV: {{ user.student_id }}</small>
+                                {% endif %}
+                            </label>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+
+        {% set has_users = namespace(value=false) %}
+        {% for belt, users in users_by_belt.items() %}
+        {% if users %}
+        {% set has_users.value = true %}
+        {% endif %}
+        {% endfor %}
+
+        {% if not has_users.value %}
+        <div class="card glass-card">
+            <div class="card-body text-center py-5">
+                <i class="bi bi-inbox display-1 text-muted"></i>
+                <p class="text-muted mt-3">Không có võ sinh nào để thăng đai</p>
+            </div>
+        </div>
+        {% endif %}
+    </form>
+</div>
+
+<!-- JavaScript for checkboxes -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Select all button
+        document.getElementById('selectAllBtn').addEventListener('click', function () {
+            document.querySelectorAll('.user-checkbox').forEach(cb => cb.checked = true);
+        });
+
+        // Deselect all button
+        document.getElementById('deselectAllBtn').addEventListener('click', function () {
+            document.querySelectorAll('.user-checkbox').forEach(cb => cb.checked = false);
+        });
+
+        // Select group buttons
+        document.querySelectorAll('.select-group-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const belt = this.dataset.belt;
+                const checkboxes = document.querySelectorAll(`.user-checkbox[data-belt="${belt}"]`);
+                const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+                checkboxes.forEach(cb => cb.checked = !allChecked);
+            });
+        });
+    });
+</script>
+{% endblock %}

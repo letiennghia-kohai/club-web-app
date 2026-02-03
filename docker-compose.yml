@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: karate_club_web
+    environment:
+      - FLASK_ENV=production
+      - DATABASE_URL=postgresql://karate_user:karate_pass@db:5432/karate_club
+    env_file:
+      - .env
+    volumes:
+      - ./app/static/uploads:/app/app/static/uploads
+      - ./logs:/app/logs
+    depends_on:
+      - db
+    networks:
+      - karate_network
+    restart: unless-stopped
+
+  db:
+    image: postgres:15-alpine
+    container_name: karate_club_db
+    environment:
+      - POSTGRES_USER=karate_user
+      - POSTGRES_PASSWORD=karate_pass
+      - POSTGRES_DB=karate_club
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - karate_network
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    container_name: karate_club_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./app/static:/app/static:ro
+      - ./app/static/uploads:/app/uploads:ro
+    depends_on:
+      - web
+    networks:
+      - karate_network
+    restart: unless-stopped
+
+networks:
+  karate_network:
+    driver: bridge
+
+volumes:
+  postgres_data:

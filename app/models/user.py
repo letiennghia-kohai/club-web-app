@@ -1,0 +1,95 @@
+"""User model with fixed relationships."""
+from datetime import datetime
+from flask_login import UserMixin
+from werkzeug.security import generate_password_hash, check_password_hash
+from app import db
+from enum import Enum
+
+
+# Belt progression order
+BELT_ORDER = [
+    'Trắng',
+    'Vàng',
+    'Cam',
+    'Xanh lá',
+    'Xanh dương',
+    'Nâu',
+    'Đỏ',
+    'Đen'
+]
+
+
+class UserRole:
+    """User role constants."""
+    ADMIN = 'ADMIN'
+    MEMBER = 'MEMBER'
+
+
+class UserStatus:
+    """User status constants."""
+    ACTIVE = 'ACTIVE'
+    INACTIVE = 'INACTIVE'
+
+
+class User(UserMixin, db.Model):
+    """User model for authentication and member management."""
+    
+    __tablename__ = 'users'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False, index=True)
+    password_hash = db.Column(db.String(255), nullable=False)
+    role = db.Column(db.String(20), nullable=False, default=UserRole.MEMBER)
+    
+    # Profile information
+    full_name = db.Column(db.String(120), nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=True)
+    student_id = db.Column(db.String(20), unique=True, nullable=True)
+    belt = db.Column(db.String(50), nullable=True)  # Cấp đai
+    join_date = db.Column(db.Date, nullable=True)
+    status = db.Column(db.String(20), nullable=False, default=UserStatus.ACTIVE)
+    
+    # Timestamps
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    #  Relationships
+    posts = db.relationship('Post', back_populates='author', lazy='dynamic', foreign_keys='Post.author_id', cascade='all, delete-orphan')
+    
+    def __repr__(self):
+        return f'<User {self.username}>'
+    
+    def set_password(self, password):
+        """Hash and set password."""
+        self.password_hash = generate_password_hash(password)
+    
+    def check_password(self, password):
+        """Verify password against hash."""
+        return check_password_hash(self.password_hash, password)
+    
+    def is_admin(self):
+        """Check if user is admin."""
+        return self.role == UserRole.ADMIN
+    
+    def is_member(self):
+        """Check if user is member."""
+        return self.role == UserRole.MEMBER
+    
+    def is_active_user(self):
+        """Check if user account is active."""
+        return self.status == UserStatus.ACTIVE
+    
+    def to_dict(self):
+        """Convert user to dictionary."""
+        return {
+            'id': self.id,
+            'username': self.username,
+            'full_name': self.full_name,
+            'email': self.email,
+            'role': self.role,
+            'belt': self.belt,
+            'student_id': self.student_id,
+            'join_date': self.join_date.isoformat() if self.join_date else None,
+            'status': self.status,
+            'created_at': self.created_at.isoformat()
+        }

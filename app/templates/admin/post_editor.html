@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}{% if post %}Chỉnh sửa bài viết{% else %}Đăng bài mới{% endif %} - Admin{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <div class="card glass-card">
+                <div class="card-header bg-warning bg-gradient">
+                    <h4 class="mb-0">
+                        <i class="bi bi-{% if post %}pencil{% else %}plus-circle{% endif %}"></i>
+                        {% if post %}Chỉnh sửa bài viết - Admin{% else %}Đăng bài mới - Admin{% endif %}
+                    </h4>
+                    <small class="text-dark"><i class="bi bi-info-circle"></i> Bài viết của admin sẽ tự động được công
+                        khai ngay lập tức</small>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST"
+                        action="{% if post %}{{ url_for('admin.edit_post', post_id=post.id) }}{% else %}{{ url_for('admin.create_post') }}{% endif %}"
+                        enctype="multipart/form-data">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+                        <!-- Title -->
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Tiêu đề <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control form-control-lg" id="title" name="title"
+                                value="{{ post.title if post else '' }}" required>
+                        </div>
+
+                        <!-- Content -->
+                        <div class="mb-3">
+                            <label for="content" class="form-label">Nội dung <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="content" name="content" rows="15"
+                                required>{{ post.content if post else '' }}</textarea>
+                            <div class="form-text">
+                                <strong>Hỗ trợ Markdown:</strong><br>
+                                <code># Tiêu đề</code>, <code>**in đậm**</code>, <code>*in nghiêng*</code>,
+                                <code>[link](url)</code>, <code>![ảnh](url)</code>
+                            </div>
+                        </div>
+
+                        <!-- Images Upload -->
+                        <div class="mb-3">
+                            <label for="images" class="form-label">Hình ảnh (tùy chọn)</label>
+                            <input type="file" class="form-control" id="images" name="images" accept="image/*" multiple>
+                            <div class="form-text">Tối đa 5 ảnh, mỗi ảnh tối đa 5MB. Định dạng: JPG, PNG, GIF, WebP
+                            </div>
+                        </div>
+
+                        {% if post %}
+                        {% set images = post.get_media_images() %}
+                        {% if images %}
+                        <div class="mb-3">
+                            <label class="form-label">Hình ảnh hiện tại</label>
+                            <div class="row g-2">
+                                {% for img in images %}
+                                <div class="col-md-2">
+                                    <img src="{{ url_for('static', filename='uploads/' + img.file_path) }}"
+                                        class="img-fluid rounded" alt="Image">
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endif %}
+
+                        <!-- Video Embed URL -->
+                        <div class="mb-4">
+                            <label for="video_url" class="form-label">Video URL (tùy chọn)</label>
+                            <input type="url" class="form-control" id="video_url" name="video_url"
+                                placeholder="https://www.youtube.com/watch?v=...">
+                            <div class="form-text">Hỗ trợ YouTube, Facebook, Google Drive</div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-warning btn-lg">
+                                <i class="bi bi-{% if post %}check-circle{% else %}send{% endif %}"></i>
+                                {% if post %}Cập nhật và công khai{% else %}Đăng và công khai ngay{% endif %}
+                            </button>
+                            <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary btn-lg">
+                                <i class="bi bi-x-circle"></i> Hủy
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

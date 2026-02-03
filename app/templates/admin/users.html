@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}Quản lý người dùng - Admin{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2><i class="bi bi-people"></i> Quản lý người dùng</h2>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a href="{{ url_for('admin.create_user') }}" class="btn btn-primary">
+                <i class="bi bi-person-plus"></i> Thêm người dùng
+            </a>
+        </div>
+    </div>
+
+    <!-- Search Form -->
+    <form method="GET" class="mb-4">
+        <div class="input-group">
+            <input type="text" name="search" class="form-control" placeholder="Tìm theo tên, email, MSSV..."
+                value="{{ search_query or '' }}">
+            <button class="btn btn-primary" type="submit">
+                <i class="bi bi-search"></i> Tìm kiếm
+            </button>
+            {% if search_query %}
+            <a href="{{ url_for('admin.users') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-x"></i> Xóa
+            </a>
+            {% endif %}
+        </div>
+    </form>
+
+    {% if users %}
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Tên đăng nhập</th>
+                        <th>Họ và tên</th>
+                        <th>Email</th>
+                        <th>Vai trò</th>
+                        <th>Đai</th>
+                        <th>Trạng thái</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td><strong>{{ user.username }}</strong></td>
+                        <td>{{ user.full_name }}</td>
+                        <td>{{ user.email or '-' }}</td>
+                        <td>
+                            <span class="badge bg-{% if user.is_admin() %}danger{% else %}primary{% endif %}">
+                                {{ user.role }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if user.belt %}
+                            <span class="badge belt-{{ user.belt|lower|replace(' ', '-') }}">
+                                {{ user.belt }}
+                            </span>
+                            {% else %}
+                            -
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge bg-{% if user.is_active_user() %}success{% else %}secondary{% endif %}">
+                                {{ user.status }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ url_for('admin.edit_user', user_id=user.id) }}"
+                                    class="btn btn-outline-primary" title="Sửa">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form method="POST" action="{{ url_for('admin.toggle_user_status', user_id=user.id) }}"
+                                    style="display: inline;">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                                    <button type="submit" class="btn btn-outline-warning"
+                                        title="{% if user.is_active_user() %}Khóa{% else %}Mở khóa{% endif %}">
+                                        <i
+                                            class="bi bi-{% if user.is_active_user() %}lock{% else %}unlock{% endif %}"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if pagination and pagination.pages > 1 %}
+    <nav aria-label="Page navigation" class="mt-4">
+        <ul class="pagination justify-content-center">
+            <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+                <a class="page-link"
+                    href="{{ url_for('admin.users', search=search_query, page=pagination.prev_num) if pagination.has_prev else '#' }}">
+                    <i class="bi bi-chevron-left"></i> Trước
+                </a>
+            </li>
+
+            {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+            {% if page_num %}
+            <li class="page-item {% if page_num == pagination.page %}active{% endif %}">
+                <a class="page-link" href="{{ url_for('admin.users', search=search_query, page=page_num) }}">{{ page_num
+                    }}</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled"><span class="page-link">...</span></li>
+            {% endif %}
+            {% endfor %}
+
+            <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+                <a class="page-link"
+                    href="{{ url_for('admin.users', search=search_query, page=pagination.next_num) if pagination.has_next else '#' }}">
+                    Sau <i class="bi bi-chevron-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    {% endif %}
+
+    {% else %}
+    <div class="card glass-card">
+        <div class="card-body text-center py-5">
+            <i class="bi bi-person-x display-1 text-muted"></i>
+            <p class="text-muted mt-3">Không có người dùng</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
