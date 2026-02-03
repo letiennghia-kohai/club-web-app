@@ -18,6 +18,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application
 COPY . .
 
+# Copy and set executable permission for entrypoint
+RUN chmod +x entrypoint.sh
+
 # Create directories
 RUN mkdir -p logs app/static/uploads/images app/static/uploads/videos
 
@@ -28,5 +31,5 @@ USER appuser
 # Expose port (Railway will override with $PORT)
 EXPOSE 8000
 
-# Run with Gunicorn using PORT from environment
-CMD gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 4 --timeout 120 wsgi:application
+# Use entrypoint script with bash
+ENTRYPOINT ["/bin/bash", "./entrypoint.sh"]
