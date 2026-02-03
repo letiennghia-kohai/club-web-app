@@ -11,9 +11,8 @@ cmds = [
 [phases.build]
 cmds = [
   "mkdir -p logs app/static/uploads/images app/static/uploads/videos",
-  "python -m flask db upgrade || true",
-  "python -m flask seed-db || true"
+  "chmod +x start.sh"
 ]
 
 [start]
-cmd = "bash -c 'gunicorn --bind 0.0.0.0:$PORT --workers 4 --timeout 120 wsgi:application'"
+cmd = "./start.sh"
