@@ -6,15 +6,17 @@ from app import db
 from enum import Enum
 
 
-# Belt progression order
+# Belt progression order (from lowest to highest)
 BELT_ORDER = [
     'Trắng',
     'Vàng',
-    'Cam',
-    'Xanh lá',
-    'Xanh dương',
-    'Nâu',
-    'Đỏ',
+    'Xanh nhạt',
+    'Xanh lá cây',
+    'Xanh đậm kuy2',
+    'Xanh đậm kuy1',
+    'Nâu kuy3',
+    'Nâu kuy2',
+    'Nâu kuy1',
     'Đen'
 ]
 

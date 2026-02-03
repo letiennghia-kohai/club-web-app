@@ -38,7 +38,7 @@ def seed_data():
             'full_name': 'Nguyễn Văn A',
             'email': 'nguyenvana@example.com',
             'student_id': '20210001',
-            'belt': 'Xanh dương',
+            'belt': 'Xanh đậm kuy1',
             'join_date': date(2021, 9, 1)
         },
         {
@@ -47,7 +47,7 @@ def seed_data():
             'full_name': 'Trần Thị B',
             'email': 'tranthib@example.com',
             'student_id': '20210002',
-            'belt': 'Nâu',
+            'belt': 'Nâu kuy2',
             'join_date': date(2021, 9, 1)
         },
         {
@@ -56,7 +56,7 @@ def seed_data():
             'full_name': 'Lê Văn C',
             'email': 'levanc@example.com',
             'student_id': '20220001',
-            'belt': 'Xanh lá',
+            'belt': 'Xanh lá cây',
             'join_date': date(2022, 9, 1)
         }
     ]

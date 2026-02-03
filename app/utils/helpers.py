@@ -109,10 +109,13 @@ def get_belt_color_class(belt):
     belt_colors = {
         'Trắng': 'belt-white',
         'Vàng': 'belt-yellow',
-        'Cam': 'belt-orange',
-        'Xanh lá': 'belt-green',
-        'Xanh dương': 'belt-blue',
-        'Nâu': 'belt-brown',
+        'Xanh nhạt': 'belt-light-blue',
+        'Xanh lá cây': 'belt-green',
+        'Xanh đậm kuy2': 'belt-dark-blue-kuy2',
+        'Xanh đậm kuy1': 'belt-dark-blue-kuy1',
+        'Nâu kuy3': 'belt-brown-kuy3',
+        'Nâu kuy2': 'belt-brown-kuy2',
+        'Nâu kuy1': 'belt-brown-kuy1',
         'Đen': 'belt-black',
     }
     return belt_colors.get(belt, 'belt-default')

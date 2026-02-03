@@ -289,9 +289,9 @@ h3 {
     color: #000000;
 }
 
-.belt-orange {
-    background-color: #FF8C00;
-    color: #FFFFFF;
+.belt-light-blue {
+    background-color: #87CEEB;
+    color: #000000;
 }
 
 .belt-green {
@@ -299,14 +299,33 @@ h3 {
     color: #FFFFFF;
 }
 
-.belt-blue {
-    background-color: #1E90FF;
+.belt-dark-blue-kuy2 {
+    background-color: #003D6B;
+    color: #FFFFFF;
+    border: 2px solid #FFD700;
+}
+
+.belt-dark-blue-kuy1 {
+    background-color: #002D52;
+    color: #FFFFFF;
+    border: 2px solid #FFD700;
+}
+
+.belt-brown-kuy3 {
+    background-color: #8B4513;
     color: #FFFFFF;
 }
 
-.belt-brown {
-    background-color: #8B4513;
+.belt-brown-kuy2 {
+    background-color: #654321;
     color: #FFFFFF;
+    border: 2px solid #FFD700;
+}
+
+.belt-brown-kuy1 {
+    background-color: #4A2511;
+    color: #FFFFFF;
+    border: 2px solid #FFD700;
 }
 
 .belt-black {
@@ -692,24 +711,43 @@ footer a:hover {
     color: #000000;
 }
 
-.belt-cam {
-    background-color: #FF8C00;
-    color: #FFFFFF;
+.belt-xanh-nhạt {
+    background-color: #87CEEB;
+    color: #000000;
 }
 
-.belt-xanh-lá {
+.belt-xanh-lá-cây {
     background-color: #228B22;
     color: #FFFFFF;
 }
 
-.belt-xanh-dương {
-    background-color: #1E90FF;
+.belt-xanh-đậm-kuy2 {
+    background-color: #003D6B;
+    color: #FFFFFF;
+    border: 2px solid #FFD700;
+}
+
+.belt-xanh-đậm-kuy1 {
+    background-color: #002D52;
+    color: #FFFFFF;
+    border: 2px solid #FFD700;
+}
+
+.belt-nâu-kuy3 {
+    background-color: #8B4513;
     color: #FFFFFF;
 }
 
-.belt-nâu {
-    background-color: #8B4513;
+.belt-nâu-kuy2 {
+    background-color: #654321;
     color: #FFFFFF;
+    border: 2px solid #FFD700;
+}
+
+.belt-nâu-kuy1 {
+    background-color: #4A2511;
+    color: #FFFFFF;
+    border: 2px solid #FFD700;
 }
 
 .belt-đen {
