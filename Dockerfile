@@ -25,8 +25,8 @@ RUN mkdir -p logs app/static/uploads/images app/static/uploads/videos
 RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
 USER appuser
 
-# Expose port
+# Expose port (Railway will override with $PORT)
 EXPOSE 8000
 
-# Run with Gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "4", "--timeout", "120", "wsgi:app"]
+# Run with Gunicorn using PORT from environment
+CMD gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 4 --timeout 120 wsgi:application
