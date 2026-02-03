@@ -6,7 +6,7 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from app import create_app, db
-from app.utils.seed import seed_database
+from app.utils.seed import seed_data
 
 print("=" * 50)
 print("DATABASE INITIALIZATION")
@@ -21,7 +21,7 @@ with app.app_context():
         print("✅ Tables created successfully!")
         
         print("\n2. Seeding initial data...")
-        seed_database()
+        seed_data()
         print("✅ Database initialized successfully!")
         
         print("\n" + "=" * 50)
