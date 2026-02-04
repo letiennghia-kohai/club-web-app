@@ -2,11 +2,13 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import current_user, logout_user
 from app.services.auth_service import AuthService
+from app import limiter
 
 auth_bp = Blueprint('auth', __name__)
 
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
+@limiter.limit("5 per minute")  # Rate limit: 5 login attempts per minute
 def login():
     """Login page."""
     # Redirect if already logged in
