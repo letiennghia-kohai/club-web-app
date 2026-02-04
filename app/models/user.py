@@ -109,6 +109,10 @@ class User(UserMixin, db.Model):
     def get_avatar_url(self):
         """Get avatar URL or None if no avatar."""
         if self.avatar:
+            # If avatar is already a full URL (Cloudinary), return it directly
+            if self.avatar.startswith(('http://', 'https://')):
+                return self.avatar
+            # Otherwise it's a local filename
             return f'/static/uploads/avatars/{self.avatar}'
         return None
     

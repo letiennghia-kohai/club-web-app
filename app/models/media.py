@@ -60,9 +60,14 @@ class Media(db.Model):
     
     def get_url(self):
         """Get media URL."""
+        # If URL field is set (Cloudinary or embedded video), return it
+        if self.url:
+            return self.url
+        # Otherwise construct local file URL
         if self.is_uploaded():
             return f'/static/uploads/{self.file_path}'
-        return self.url
+        return None
+
     
     def get_file_size_mb(self):
         """Get file size in MB."""
