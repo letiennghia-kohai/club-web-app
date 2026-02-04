@@ -10,15 +10,17 @@ print("=== Starting Railway Deployment ===")
 print("Checking database...")
 try:
     from app import create_app, db
-    from app.utils.seed import seed_data
+    from app.utils.seed import seed_data # This import might not be needed if seed_data is moved into reset_database_if_needed or removed.
     
     app = create_app()
     with app.app_context():
-        # Try to create tables (will skip if already exist)
-        db.create_all()
-        print("✅ Database tables ready")
+        # Check if database reset is requested
+        reset_database_if_needed()
         
-        # Try to seed data (will skip if already exists)
+        # Initialize database (create tables if they don't exist)
+        init_database()
+
+        # Original seed_data call, kept for compatibility if not fully replaced by reset_database_if_needed
         try:
             seed_data()
             print("✅ Initial data seeded")
@@ -26,7 +28,7 @@ try:
             print(f"ℹ️  Seed skipped (data may already exist): {e}")
             
 except Exception as e:
-    print(f"⚠️  Database check failed: {e}")
+    print(f"⚠️  Database check/init failed: {e}")
     print("Will try to start anyway...")
 
 # Start Gunicorn
