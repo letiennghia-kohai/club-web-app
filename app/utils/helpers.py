@@ -120,7 +120,12 @@ def get_belt_color_class(belt):
         'Kuy 3': 'belt-kuy-3',
         'Kuy 2': 'belt-kuy-2',
         'Kuy 1': 'belt-kuy-1',
-        'Đen': 'belt-black',
+        # Black belt dan ranks
+        'Đai đen nhất đẳng': 'belt-black-dan-1',
+        'Đai đen nhị đẳng': 'belt-black-dan-2',
+        'Đai đen tam đẳng': 'belt-black-dan-3',
+        'Đai đen tứ đẳng': 'belt-black-dan-4',
+        'Đai đen ngũ đẳng': 'belt-black-dan-5',
     }
     return belt_colors.get(belt, 'belt-default')
 

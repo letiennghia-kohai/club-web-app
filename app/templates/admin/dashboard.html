@@ -135,7 +135,7 @@
                                     <h6 class="mb-0">{{ user.full_name }}</h6>
                                     <small class="text-muted">
                                         {% if user.belt %}
-                                        <span class="badge belt-{{ user.belt|lower|replace(' ', '-') }}">
+                                        <span class="badge {{ get_belt_color_class(user.belt) }}">
                                             {{ user.belt }}
                                         </span>
                                         {% endif %}
@@ -181,6 +181,9 @@
                 </a>
                 <a href="{{ url_for('admin.create_user') }}" class="btn btn-outline-success">
                     <i class="bi bi-person-plus"></i> Thêm người dùng
+                </a>
+                <a href="{{ url_for('admin.tags') }}" class="btn btn-outline-info">
+                    <i class="bi bi-tags"></i> Quản lý Tags
                 </a>
             </div>
         </div>

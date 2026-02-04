@@ -37,17 +37,33 @@
 <section class="py-5">
     <div class="container">
         <div class="row mb-4">
-            <div class="col-md-8">
+            <div class="col-12">
                 <h2><i class="bi bi-newspaper"></i> Tin tức & Hoạt động</h2>
-                <p class="text-muted">Cập nhật những hoạt động mới nhất của câu lạc bộ</p>
-            </div>
-            <div class="col-md-4 text-md-end">
-                <form action="{{ url_for('public.search') }}" method="GET" class="d-flex">
-                    <input type="search" name="q" class="form-control" placeholder="Tìm kiếm bài viết...">
-                    <button type="submit" class="btn btn-primary ms-2">
-                        <i class="bi bi-search"></i>
-                    </button>
-                </form>
+
+                <!-- Tag Filter Tabs -->
+                {% if all_tags %}
+                <div class="mt-3">
+                    <div class="d-flex flex-wrap gap-2 align-items-center">
+                        <span class="text-muted me-2"><i class="bi bi-filter"></i> Lọc:</span>
+
+                        <!-- All Posts Tab -->
+                        <a href="{{ url_for('public.index') }}"
+                            class="btn btn-sm {% if not selected_tag %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                            <i class="bi bi-grid-3x3"></i> Tất cả
+                        </a>
+
+                        <!-- Tag Tabs -->
+                        {% for tag in all_tags %}
+                        <a href="{{ url_for('public.index', tag=tag.slug) }}"
+                            class="btn btn-sm {% if selected_tag and selected_tag.id == tag.id %}btn-primary{% else %}btn-outline-secondary{% endif %}"
+                            style="{% if selected_tag and selected_tag.id == tag.id %}background-color: {{ tag.color }}; border-color: {{ tag.color }};{% endif %}">
+                            {{ tag.name }}
+                            <span class="badge bg-white text-dark ms-1">{{ tag.post_count }}</span>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
             </div>
         </div>
 
@@ -76,9 +92,30 @@
                             {{ post.content[:150] }}{% if post.content|length > 150 %}...{% endif %}
                         </p>
 
+                        <!-- Tags -->
+                        {% set post_tags = post.tags.all() %}
+                        {% if post_tags %}
+                        <div class="mb-2">
+                            {% for tag in post_tags %}
+                            <span class="badge me-1" style="background-color: {{ tag.color }}">
+                                {{ tag.name }}
+                            </span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
                         <div class="post-meta">
-                            <span>
-                                <i class="bi bi-person"></i> {{ post.author.full_name }}
+                            <span class="d-flex align-items-center gap-2">
+                                {% if post.author.get_avatar_url() %}
+                                <img src="{{ post.author.get_avatar_url() }}" alt="{{ post.author.full_name }}"
+                                    class="rounded-circle" style="width: 24px; height: 24px; object-fit: cover;">
+                                {% else %}
+                                <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center"
+                                    style="width: 24px; height: 24px; font-size: 11px; font-weight: bold;">
+                                    {{ post.author.get_initials() }}
+                                </div>
+                                {% endif %}
+                                {{ post.author.full_name }}
                                 {% if post.is_admin_post() %}
                                 <span class="admin-author-badge"><i class="bi bi-shield-fill-check"></i> ADMIN</span>
                                 {% endif %}
@@ -140,8 +177,75 @@
     </div>
 </section>
 
-<!-- CTA Section -->
+<!-- Confession Section -->
+{% if confession_posts and not selected_tag %}
 <section class="py-5 bg-light">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h2><i class="bi bi-chat-heart"></i> Confession</h2>
+                <p class="text-muted">Chia sẻ những tâm sự, cảm xúc của các thành viên</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                {% if confession_tag %}
+                <a href="{{ url_for('public.index', tag=confession_tag.slug) }}" class="btn btn-outline-primary">
+                    Xem tất cả <i class="bi bi-arrow-right"></i>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row g-4">
+            {% for post in confession_posts %}
+            <div class="col-md-4">
+                <div class="card post-card fade-in">
+                    {% set images = post.get_media_images() %}
+                    {% if images %}
+                    <img src="{{ url_for('static', filename='uploads/' + images[0].file_path) }}"
+                        class="post-card-image" alt="{{ post.title }}">
+                    {% else %}
+                    <div class="post-card-image" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    </div>
+                    {% endif %}
+
+                    <div class="card-body post-card-body">
+                        <h5 class="post-card-title">{{ post.title }}</h5>
+                        <p class="post-card-excerpt">
+                            {{ post.content[:100] }}{% if post.content|length > 100 %}...{% endif %}
+                        </p>
+
+                        <div class="post-meta">
+                            <span class="d-flex align-items-center gap-2">
+                                {% if post.author.get_avatar_url() %}
+                                <img src="{{ post.author.get_avatar_url() }}" alt="{{ post.author.full_name }}"
+                                    class="rounded-circle" style="width: 24px; height: 24px; object-fit: cover;">
+                                {% else %}
+                                <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center"
+                                    style="width: 24px; height: 24px; font-size: 11px; font-weight: bold;">
+                                    {{ post.author.get_initials() }}
+                                </div>
+                                {% endif %}
+                                {{ post.author.full_name }}
+                            </span>
+                            <span><i class="bi bi-calendar"></i> {{ post.published_at.strftime('%d/%m/%Y') if
+                                post.published_at else '' }}</span>
+                        </div>
+
+                        <a href="{{ url_for('public.post_detail', post_id=post.id) }}"
+                            class="btn btn-primary w-100 mt-3">
+                            Đọc tiếp <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- CTA Section -->
+<section class="py-5 {% if not confession_posts or selected_tag %}bg-light{% endif %}">
     <div class="container text-center">
         <h2 class="mb-3">Tham gia cùng chúng tôi</h2>
         <p class="lead text-muted mb-4">

@@ -311,6 +311,10 @@ def delete_comment(comment_id):
 @admin_required
 def create_post():
     """Admin creates a post (auto-published)."""
+    from app.models.tag import Tag
+    
+    # Get all tags for selection
+    all_tags = Tag.query.order_by(Tag.name).all()
     if request.method == 'POST':
         title = request.form.get('title', '').strip()
         content = request.form.get('content', '').strip()
@@ -332,6 +336,18 @@ def create_post():
         post.status = PostStatus.PUBLISHED
         post.published_at = db.func.now()
         
+        # Handle tag selection
+        tag_ids = request.form.getlist('tag_ids[]')
+        if tag_ids:
+            from app.models.tag import Tag
+            for tag_id in tag_ids:
+                try:
+                    tag = Tag.query.get(int(tag_id))
+                    if tag:
+                        post.tags.append(tag)
+                except (ValueError, TypeError):
+                    continue
+        
         # Handle images
         if images:
             from app.services.media_service import MediaService
@@ -352,7 +368,8 @@ def create_post():
         flash(f'Bài viết "{post.title}" đã được đăng và công khai', 'success')
         return redirect(url_for('admin.dashboard'))
     
-    return render_template('admin/post_editor.html', post=None)
+    all_tags = Tag.query.order_by(Tag.name).all()
+    return render_template('admin/post_editor.html', post=None, all_tags=all_tags)
 
 
 @admin_bp.route('/posts/<int:post_id>/edit', methods=['GET', 'POST'])
@@ -379,6 +396,21 @@ def edit_post(post_id):
             flash(error, 'danger')
             return render_template('admin/post_editor.html', post=post)
         
+        # Update tags
+        tag_ids = request.form.getlist('tag_ids[]')
+        from app.models.tag import Tag
+        # Clear existing tags
+        post.tags = []
+        # Add selected tags
+        if tag_ids:
+            for tag_id in tag_ids:
+                try:
+                    tag = Tag.query.get(int(tag_id))
+                    if tag:
+                        post.tags.append(tag)
+                except (ValueError, TypeError):
+                    continue
+        
         # Handle new images
         if images:
             from app.services.media_service import MediaService
@@ -403,7 +435,11 @@ def edit_post(post_id):
     images = post.get_media_images()
     videos = post.get_media_videos()
     
-    return render_template('admin/post_editor.html', post=post, images=images, videos=videos)
+    # Get all tags for selection
+    from app.models.tag import Tag
+    all_tags = Tag.query.order_by(Tag.name).all()
+    
+    return render_template('admin/post_editor.html', post=post, images=images, videos=videos, all_tags=all_tags)
 
 
 @admin_bp.route('/promotions', methods=['GET'])
@@ -467,3 +503,114 @@ def bulk_promote():
         flash(error, 'warning')
     
     return redirect(url_for('admin.promotions'))
+"""Admin routes for Tag management."""
+# Add to admin.py after line 470
+
+@admin_bp.route('/tags')
+@admin_required
+def tags():
+    """List all tags with post counts."""
+    from app.models.tag import Tag
+    
+    all_tags = Tag.query.order_by(Tag.name).all()
+    
+    return render_template(
+        'admin/tags.html',
+        tags=all_tags
+    )
+
+
+@admin_bp.route('/tags/create', methods=['GET', 'POST'])
+@admin_required
+def create_tag():
+    """Create new tag."""
+    from app.models.tag import Tag
+    
+    if request.method == 'POST':
+        name = request.form.get('name', '').strip()
+        color = request.form.get('color', '#6c757d').strip()
+        
+        if not name:
+            flash('Tên thẻ không được để trống', 'danger')
+            return render_template('admin/tag_form.html', tag=None)
+        
+        # Check if tag already exists
+        existing = Tag.query.filter_by(name=name).first()
+        if existing:
+            flash(f'Thẻ "{name}" đã tồn tại', 'warning')
+            return render_template('admin/tag_form.html', tag=None)
+        
+        # Create tag with auto-generated slug
+        tag = Tag(
+            name=name,
+            slug=Tag.generate_slug(name),
+            color=color
+        )
+        
+        try:
+            db.session.add(tag)
+            db.session.commit()
+            flash(f'Đã tạo thẻ "{name}"', 'success')
+            return redirect(url_for('admin.tags'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Lỗi khi tạo thẻ: {str(e)}', 'danger')
+    
+    return render_template('admin/tag_form.html', tag=None)
+
+
+@admin_bp.route('/tags/<int:tag_id>/edit', methods=['GET', 'POST'])
+@admin_required
+def edit_tag(tag_id):
+    """Edit existing tag."""
+    from app.models.tag import Tag
+    
+    tag = Tag.query.get_or_404(tag_id)
+    
+    if request.method == 'POST':
+        name = request.form.get('name', '').strip()
+        color = request.form.get('color', '').strip()
+        
+        if not name:
+            flash('Tên thẻ không được để trống', 'danger')
+            return render_template('admin/tag_form.html', tag=tag)
+        
+        # Check for duplicate name (excluding current tag)
+        existing = Tag.query.filter(Tag.name == name, Tag.id != tag_id).first()
+        if existing:
+            flash(f'Thẻ "{name}" đã tồn tại', 'warning')
+            return render_template('admin/tag_form.html', tag=tag)
+        
+        tag.name = name
+        tag.slug = Tag.generate_slug(name)
+        tag.color = color
+        
+        try:
+            db.session.commit()
+            flash(f'Đã cập nhật thẻ "{name}"', 'success')
+            return redirect(url_for('admin.tags'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Lỗi khi cập nhật: {str(e)}', 'danger')
+    
+    return render_template('admin/tag_form.html', tag=tag)
+
+
+@admin_bp.route('/tags/<int:tag_id>/delete', methods=['POST'])
+@admin_required
+def delete_tag(tag_id):
+    """Delete tag (removes from all posts)."""
+    from app.models.tag import Tag
+    
+    tag = Tag.query.get_or_404(tag_id)
+    
+    try:
+        # SQLAlchemy will handle removing from post_tags junction table
+        db.session.delete(tag)
+        db.session.commit()
+        flash(f'Đã xóa thẻ "{tag.name}"', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Lỗi khi xóa: {str(e)}', 'danger')
+    
+    return redirect(url_for('admin.tags'))

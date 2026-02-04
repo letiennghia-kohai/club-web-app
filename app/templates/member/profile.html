@@ -11,8 +11,35 @@
                     <h4 class="mb-0"><i class="bi bi-person"></i> Chỉnh sửa hồ sơ</h4>
                 </div>
                 <div class="card-body p-4">
-                    <form method="POST" action="{{ url_for('member.profile') }}">
+                    <form method="POST" action="{{ url_for('member.profile') }}" enctype="multipart/form-data">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+                        <!-- Avatar Upload -->
+                        <div class="mb-4 text-center">
+                            <label class="form-label d-block">Ảnh đại diện</label>
+                            <div class="mb-3">
+                                {% if current_user.get_avatar_url() %}
+                                <img src="{{ current_user.get_avatar_url() }}" alt="Avatar" class="rounded-circle"
+                                    style="width: 150px; height: 150px; object-fit: cover;">
+                                {% else %}
+                                <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center"
+                                    style="width: 150px; height: 150px; font-size: 48px; font-weight: bold;">
+                                    {{ current_user.get_initials() }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            <input type="file" class="form-control w-auto mx-auto" name="avatar" accept="image/*">
+                            <div class="form-text">Tối đa 2MB. Ảnh sẽ được resize về 400x400px</div>
+                            {% if current_user.get_avatar_url() %}
+                            <div class="form-check mt-2">
+                                <input class="form-check-input" type="checkbox" name="remove_avatar" value="1"
+                                    id="removeAvatar">
+                                <label class="form-check-label" for="removeAvatar">
+                                    Xóa ảnh đại diện
+                                </label>
+                            </div>
+                            {% endif %}
+                        </div>
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
@@ -37,34 +64,16 @@
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label for="belt" class="form-label">Đai</label>
+                                <label for="belt" class="form-label">Trình độ</label>
                                 <select class="form-select" id="belt" name="belt">
-                                    <option value="">Chọn đai</option>
-                                    <option value="Trắng" {% if current_user.belt=='Trắng' %}selected{% endif %}>Trắng
+                                    <option value="">Chọn trình độ</option>
+                                    {% for belt in ['Kuy 10', 'Kuy 9', 'Kuy 8', 'Kuy 7', 'Kuy 6', 'Kuy 5', 'Kuy 4', 'Kuy
+                                    3', 'Kuy 2', 'Kuy 1', 'Đai đen nhất đẳng', 'Đai đen nhị đẳng', 'Đai đen tam đẳng',
+                                    'Đai đen tứ đẳng', 'Đai đen ngũ đẳng'] %}
+                                    <option value="{{ belt }}" {% if current_user.belt==belt %}selected{% endif %}>
+                                        {{ belt }}
                                     </option>
-                                    <option value="Vàng" {% if current_user.belt=='Vàng' %}selected{% endif %}>Vàng
-                                    </option>
-                                    <option value="Xanh nhạt" {% if current_user.belt=='Xanh nhạt' %}selected{% endif
-                                        %}>Xanh nhạt
-                                    </option>
-                                    <option value="Xanh lá cây" {% if current_user.belt=='Xanh lá cây' %}selected{%
-                                        endif %}>
-                                        Xanh lá cây</option>
-                                    <option value="Xanh đậm kuy2" {% if current_user.belt=='Xanh đậm kuy2' %}selected{%
-                                        endif %}>Xanh đậm kuy2</option>
-                                    <option value="Xanh đậm kuy1" {% if current_user.belt=='Xanh đậm kuy1' %}selected{%
-                                        endif %}>Xanh đậm kuy1</option>
-                                    <option value="Nâu kuy3" {% if current_user.belt=='Nâu kuy3' %}selected{% endif %}>
-                                        Nâu kuy3
-                                    </option>
-                                    <option value="Nâu kuy2" {% if current_user.belt=='Nâu kuy2' %}selected{% endif %}>
-                                        Nâu kuy2
-                                    </option>
-                                    <option value="Nâu kuy1" {% if current_user.belt=='Nâu kuy1' %}selected{% endif %}>
-                                        Nâu kuy1
-                                    </option>
-                                    <option value="Đen" {% if current_user.belt=='Đen' %}selected{% endif %}>Đen
-                                    </option>
+                                    {% endfor %}
                                 </select>
                             </div>
                         </div>

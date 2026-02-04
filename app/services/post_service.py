@@ -237,4 +237,43 @@ class PostService:
     def get_all_posts():
         """Get all posts (admin function)."""
         return Post.query.order_by(Post.created_at.desc()).all()
-
+    
+    @staticmethod
+    def get_posts_by_tag(tag_id, page=1, per_page=12):
+        """Get published posts filtered by tag."""
+        from app.models.tag import Tag
+        
+        tag = Tag.query.get(tag_id)
+        if not tag:
+            return Post.query.filter_by(id=0).paginate(page=page, per_page=per_page, error_out=False)
+        
+        return tag.posts.filter_by(
+            status=PostStatus.PUBLISHED
+        ).order_by(
+            Post.published_at.desc()
+        ).paginate(
+            page=page,
+            per_page=per_page,
+            error_out=False
+        )
+    
+    @staticmethod
+    def get_published_posts_except_tag(tag_id, page=1, per_page=12):
+        """Get published posts excluding specific tag."""
+        from app.models.tag import post_tags
+        
+        # Get posts that don't have the specified tag
+        subquery = db.session.query(post_tags.c.post_id).filter(
+            post_tags.c.tag_id == tag_id
+        )
+        
+        return Post.query.filter(
+            Post.status == PostStatus.PUBLISHED,
+            ~Post.id.in_(subquery)
+        ).order_by(
+            Post.published_at.desc()
+        ).paginate(
+            page=page,
+            per_page=per_page,
+            error_out=False
+        )

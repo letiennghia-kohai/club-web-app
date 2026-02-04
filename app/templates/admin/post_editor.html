@@ -65,6 +65,33 @@
                         {% endif %}
                         {% endif %}
 
+                        <!-- Tag Selection -->
+                        {% if all_tags %}
+                        <div class="mb-3">
+                            <label class="form-label">Tags (tùy chọn)</label>
+                            <div class="border rounded p-3 bg-light">
+                                <div class="row g-2">
+                                    {% for tag in all_tags %}
+                                    <div class="col-md-3 col-sm-4 col-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="tag_ids[]"
+                                                value="{{ tag.id }}" id="tag{{ tag.id }}" {% if post and tag in
+                                                post.tags.all() %}checked{% endif %}>
+                                            <label class="form-check-label d-flex align-items-center"
+                                                for="tag{{ tag.id }}">
+                                                <span class="badge me-1" style="background-color: {{ tag.color }}">
+                                                    {{ tag.name }}
+                                                </span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="form-text">Chọn các tag phù hợp để phân loại bài viết</div>
+                        </div>
+                        {% endif %}
+
                         <!-- Video Embed URL -->
                         <div class="mb-4">
                             <label for="video_url" class="form-label">Video URL (tùy chọn)</label>

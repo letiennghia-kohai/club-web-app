@@ -51,6 +51,9 @@ def create_app(config_name=None):
     # Register template filters (must be before CLI commands)
     register_template_filters(app)
     
+    # Register context processors
+    register_context_processors(app)
+    
     # Register CLI commands
     register_commands(app)
     
@@ -152,6 +155,20 @@ def register_template_filters(app):
     def truncate_words_filter(text, length=50):
         """Truncate text to specified length."""
         return truncate_text(text, length)
+
+
+def register_context_processors(app):
+    """Register template context processors."""
+    from app.utils.helpers import get_belt_color_class
+    from app.models.user import BELT_ORDER
+    
+    @app.context_processor
+    def utility_processor():
+        """Make utility functions available in all templates."""
+        return {
+            'get_belt_color_class': get_belt_color_class,
+            'BELT_ORDER': BELT_ORDER
+        }
 
 
 def register_commands(app):

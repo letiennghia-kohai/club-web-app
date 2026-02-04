@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}{% if tag %}Chỉnh sửa{% else %}Tạo{% endif %} Tag - Admin{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0">
+                        <i class="bi bi-tag"></i>
+                        {% if tag %}Chỉnh sửa Tag{% else %}Tạo Tag Mới{% endif %}
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+                        <div class="mb-3">
+                            <label for="name" class="form-label">
+                                Tên Tag <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control" id="name" name="name"
+                                value="{{ tag.name if tag else '' }}" placeholder="VD: Kata, Kumite, Thi đấu..."
+                                required autofocus>
+                            <div class="form-text">
+                                Slug sẽ được tự động tạo từ tên (VD: "Thi đấu" → "thi-dau")
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="color" class="form-label">Màu Badge</label>
+                            <div class="input-group">
+                                <input type="color" class="form-control form-control-color" id="color" name="color"
+                                    value="{{ tag.color if tag else '#6c757d' }}" title="Chọn màu">
+                                <input type="text" class="form-control" id="color-hex" readonly
+                                    value="{{ tag.color if tag else '#6c757d' }}">
+                            </div>
+                            <div class="form-text">
+                                Màu hiển thị cho badge tag (mặc định: #6c757d)
+                            </div>
+                            <div class="mt-2">
+                                <small class="text-muted">Preview:</small>
+                                <span class="badge ms-2" id="preview-badge"
+                                    style="background-color: {{ tag.color if tag else '#6c757d' }}">
+                                    <span id="preview-text">{{ tag.name if tag else 'Sample Tag' }}</span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle"></i> {% if tag %}Lưu thay đổi{% else %}Tạo Tag{% endif %}
+                            </button>
+                            <a href="{{ url_for('admin.tags') }}" class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> Hủy
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            {% if tag %}
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h6 class="card-title">Thông tin</h6>
+                    <ul class="list-unstyled mb-0">
+                        <li><strong>Slug:</strong> <code>{{ tag.slug }}</code></li>
+                        <li><strong>Số bài viết:</strong> {{ tag.post_count }}</li>
+                        <li><strong>Ngày tạo:</strong> {{ tag.created_at.strftime('%d/%m/%Y %H:%M') }}</li>
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    // Live preview update
+    document.addEventListener('DOMContentLoaded', function () {
+        const colorInput = document.getElementById('color');
+        const colorHex = document.getElementById('color-hex');
+        const previewBadge = document.getElementById('preview-badge');
+        const nameInput = document.getElementById('name');
+        const previewText = document.getElementById('preview-text');
+
+        // Update color preview
+        colorInput.addEventListener('input', function () {
+            const color = this.value;
+            colorHex.value = color;
+            previewBadge.style.backgroundColor = color;
+        });
+
+        // Update text preview
+        nameInput.addEventListener('input', function () {
+            previewText.textContent = this.value || 'Sample Tag';
+        });
+    });
+</script>
+{% endblock %}

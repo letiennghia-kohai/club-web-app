@@ -343,13 +343,90 @@ h3 {
     border: 2px solid #FFD700;
 }
 
-.belt-black {
+
+/* Black Belt Dan Ranks */
+.belt-black-dan-1 {
     background: linear-gradient(135deg, #000000, #1A1A1A);
     color: #FFD700;
     font-weight: 700;
     border: 2px solid #FFD700;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    position: relative;
 }
+
+.belt-black-dan-2 {
+    background: linear-gradient(135deg, #000000, #1A1A1A);
+    color: #FFD700;
+    font-weight: 700;
+    border: 3px solid #FFD700;
+    box-shadow: 0 4px 10px rgba(255, 215, 0, 0.4);
+    position: relative;
+}
+
+.belt-black-dan-2::after {
+    content: '★★';
+    margin-left: 0.5rem;
+    font-size: 0.8em;
+}
+
+.belt-black-dan-3 {
+    background: linear-gradient(135deg, #000000, #2A2A2A);
+    color: #FFD700;
+    font-weight: 700;
+    border: 3px solid #FFD700;
+    box-shadow: 0 6px 12px rgba(255, 215, 0, 0.5);
+    position: relative;
+}
+
+.belt-black-dan-3::after {
+    content: '★★★';
+    margin-left: 0.5rem;
+    font-size: 0.8em;
+}
+
+.belt-black-dan-4 {
+    background: linear-gradient(135deg, #000000, #1A1A1A, #000000);
+    color: #FFD700;
+    font-weight: 800;
+    border: 4px double #FFD700;
+    box-shadow: 0 6px 14px rgba(255, 215, 0, 0.6);
+    text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+}
+
+.belt-black-dan-4::after {
+    content: '★★★★';
+    margin-left: 0.5rem;
+    font-size: 0.8em;
+}
+
+.belt-black-dan-5 {
+    background: linear-gradient(135deg, #000000, #2A2A2A, #FFD700, #2A2A2A, #000000);
+    color: #FFD700;
+    font-weight: 800;
+    border: 4px double #FFD700;
+    box-shadow: 0 8px 16px rgba(255, 215, 0, 0.7), 0 0 20px rgba(255, 215, 0, 0.3);
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.8);
+    animation: glow-pulse 2s ease-in-out infinite;
+}
+
+.belt-black-dan-5::after {
+    content: '★★★★★';
+    margin-left: 0.5rem;
+    font-size: 0.8em;
+}
+
+@keyframes glow-pulse {
+
+    0%,
+    100% {
+        box-shadow: 0 8px 16px rgba(255, 215, 0, 0.7), 0 0 20px rgba(255, 215, 0, 0.3);
+    }
+
+    50% {
+        box-shadow: 0 8px 16px rgba(255, 215, 0, 0.9), 0 0 30px rgba(255, 215, 0, 0.5);
+    }
+}
+
 
 .belt-default {
     background-color: #E9ECEF;

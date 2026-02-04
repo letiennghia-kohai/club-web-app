@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Quản lý Tags - Admin{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2><i class="bi bi-tags"></i> Quản lý Tags</h2>
+            <p class="text-muted">Tags giúp phân loại và tìm kiếm bài viết dễ dàng hơn</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a href="{{ url_for('admin.create_tag') }}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Thêm Tag
+            </a>
+        </div>
+    </div>
+
+    {% if tags %}
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th style="width: 30%;">Tên Tag</th>
+                        <th style="width: 30%;">Slug</th>
+                        <th style="width: 10%;">Màu</th>
+                        <th style="width: 15%;">Số bài viết</th>
+                        <th style="width: 15%;">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tag in tags %}
+                    <tr>
+                        <td>
+                            <span class="badge" style="background-color: {{ tag.color }}">
+                                {{ tag.name }}
+                            </span>
+                        </td>
+                        <td><code>{{ tag.slug }}</code></td>
+                        <td>
+                            <span class="badge" style="background-color: {{ tag.color }}">
+                                {{ tag.color }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge bg-secondary">{{ tag.post_count }} bài</span>
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ url_for('admin.edit_tag', tag_id=tag.id) }}" class="btn btn-outline-primary"
+                                    title="Sửa">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form method="POST" action="{{ url_for('admin.delete_tag', tag_id=tag.id) }}"
+                                    style="display: inline;"
+                                    onsubmit="return confirm('Xóa tag này sẽ loại bỏ nó khỏi tất cả bài viết. Tiếp tục?')">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                                    <button type="submit" class="btn btn-outline-danger" title="Xóa">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <small class="text-muted">
+            <i class="bi bi-info-circle"></i> Slug được tự động tạo từ tên tag và dùng cho URL
+        </small>
+    </div>
+
+    {% else %}
+    <div class="card glass-card">
+        <div class="card-body text-center py-5">
+            <i class="bi bi-tags display-1 text-muted"></i>
+            <p class="text-muted mt-3">Chưa có tag nào</p>
+            <a href="{{ url_for('admin.create_tag') }}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Tạo tag đầu tiên
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

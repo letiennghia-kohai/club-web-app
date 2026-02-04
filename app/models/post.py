@@ -43,6 +43,9 @@ class Post(db.Model):
     media = db.relationship('Media', back_populates='post', lazy='dynamic', cascade='all, delete-orphan')
     comments = db.relationship('Comment', back_populates='post', lazy='dynamic', cascade='all, delete-orphan')
     
+    # Tags relationship (many-to-many)
+    tags = db.relationship('Tag', secondary='post_tags', back_populates='posts', lazy='dynamic')
+    
     def __repr__(self):
         return f'<Post {self.id}: {self.title}>'
     

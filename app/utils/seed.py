@@ -23,7 +23,7 @@ def seed_data():
             email=admin_email,
             role=UserRole.ADMIN,
             status=UserStatus.ACTIVE,
-            belt='Đen',  # Black belt for admin
+            belt='Đai đen nhất đẳng',  # Black belt 1st Dan
             join_date=date(2020, 1, 1)
         )
         admin.set_password(admin_password)

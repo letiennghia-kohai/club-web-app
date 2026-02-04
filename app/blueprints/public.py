@@ -11,15 +11,43 @@ public_bp = Blueprint('public', __name__)
 
 @public_bp.route('/')
 def index():
-    """Homepage with paginated posts."""
-    page = request.args.get('page', 1, type=int)
+    """Homepage with published posts."""
+    from app.models.tag import Tag
     
-    pagination = PostService.get_published_posts(page=page, per_page=12)
+    page = request.args.get('page', 1, type=int)
+    tag_slug = request.args.get('tag', None)
+    
+    # Get all tags for filter tabs
+    all_tags = Tag.query.order_by(Tag.name).all()
+    
+    # Find confession tag
+    confession_tag = Tag.query.filter_by(slug='confession').first()
+    
+    # Filter by tag if specified
+    if tag_slug:
+        tag = Tag.query.filter_by(slug=tag_slug).first_or_404()
+        pagination = PostService.get_posts_by_tag(tag.id, page=page, per_page=12)
+        selected_tag = tag
+        confession_posts = []
+    else:
+        # Get regular posts (exclude confession)
+        if confession_tag:
+            pagination = PostService.get_published_posts_except_tag(confession_tag.id, page=page, per_page=12)
+            # Get confession posts separately
+            confession_posts = PostService.get_posts_by_tag(confession_tag.id, page=1, per_page=6).items
+        else:
+            pagination = PostService.get_published_posts(page=page, per_page=12)
+            confession_posts = []
+        selected_tag = None
     
     return render_template(
         'public/index.html',
         posts=pagination.items,
-        pagination=pagination
+        pagination=pagination,
+        all_tags=all_tags,
+        selected_tag=selected_tag,
+        confession_posts=confession_posts,
+        confession_tag=confession_tag
     )
 
 

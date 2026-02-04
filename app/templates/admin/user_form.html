@@ -60,35 +60,44 @@
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label for="belt" class="form-label">Đai</label>
+                                <label for="belt" class="form-label">Trình độ</label>
                                 <select class="form-select" id="belt" name="belt">
-                                    <option value="">Chọn đai</option>
-                                    <option value="Trắng" {% if user and user.belt=='Trắng' %}selected{% endif %}>Trắng
+                                    <option value="">Chọn trình độ</option>
+                                    {% for belt in ['Kuy 10', 'Kuy 9', 'Kuy 8', 'Kuy 7', 'Kuy 6', 'Kuy 5', 'Kuy 4', 'Kuy
+                                    3', 'Kuy 2', 'Kuy 1', 'Đai đen nhất đẳng', 'Đai đen nhị đẳng', 'Đai đen tam đẳng',
+                                    'Đai đen tứ đẳng', 'Đai đen ngũ đẳng'] %}
+                                    <option value="{{ belt }}" {% if user and user.belt==belt %}selected{% endif %}>
+                                        {{ belt }}
                                     </option>
-                                    <option value="Vàng" {% if user and user.belt=='Vàng' %}selected{% endif %}>Vàng
-                                    </option>
-                                    <option value="Xanh nhạt" {% if user and user.belt=='Xanh nhạt' %}selected{% endif
-                                        %}>Xanh nhạt
-                                    </option>
-                                    <option value="Xanh lá cây" {% if user and user.belt=='Xanh lá cây' %}selected{%
-                                        endif %}>
-                                        Xanh lá cây</option>
-                                    <option value="Xanh đậm kuy2" {% if user and user.belt=='Xanh đậm kuy2' %}selected{%
-                                        endif %}>Xanh đậm kuy2</option>
-                                    <option value="Xanh đậm kuy1" {% if user and user.belt=='Xanh đậm kuy1' %}selected{%
-                                        endif %}>Xanh đậm kuy1</option>
-                                    <option value="Nâu kuy3" {% if user and user.belt=='Nâu kuy3' %}selected{% endif %}>
-                                        Nâu kuy3
-                                    </option>
-                                    <option value="Nâu kuy2" {% if user and user.belt=='Nâu kuy2' %}selected{% endif %}>
-                                        Nâu kuy2
-                                    </option>
-                                    <option value="Nâu kuy1" {% if user and user.belt=='Nâu kuy1' %}selected{% endif %}>
-                                        Nâu kuy1
-                                    </option>
-                                    <option value="Đen" {% if user and user.belt=='Đen' %}selected{% endif %}>Đen
-                                    </option>
+                                    {% endfor %}
                                 </select>
+                            </div>
+                        </div>
+
+                        <!-- Additional Profile Fields -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="date_of_birth" class="form-label">Ngày sinh</label>
+                                <input type="date" class="form-control" id="date_of_birth" name="date_of_birth"
+                                    value="{{ user.date_of_birth.strftime('%Y-%m-%d') if user and user.date_of_birth else '' }}">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="phone_number" class="form-label">Số điện thoại</label>
+                                <input type="tel" class="form-control" id="phone_number" name="phone_number"
+                                    value="{{ user.phone_number or '' }}" placeholder="+84 ...">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="facebook_link" class="form-label">Facebook</label>
+                                <input type="url" class="form-control" id="facebook_link" name="facebook_link"
+                                    value="{{ user.facebook_link or '' }}" placeholder="https://facebook.com/...">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="hometown" class="form-label">Quê quán</label>
+                                <input type="text" class="form-control" id="hometown" name="hometown"
+                                    value="{{ user.hometown or '' }}" placeholder="Hà Nội, TP HCM...">
                             </div>
                         </div>
 

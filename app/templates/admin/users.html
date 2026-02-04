@@ -41,7 +41,7 @@
                         <th>Họ và tên</th>
                         <th>Email</th>
                         <th>Vai trò</th>
-                        <th>Đai</th>
+                        <th>Trình độ</th>
                         <th>Trạng thái</th>
                         <th>Hành động</th>
                     </tr>
@@ -59,7 +59,7 @@
                         </td>
                         <td>
                             {% if user.belt %}
-                            <span class="badge belt-{{ user.belt|lower|replace(' ', '-') }}">
+                            <span class="badge {{ get_belt_color_class(user.belt) }}">
                                 {{ user.belt }}
                             </span>
                             {% else %}

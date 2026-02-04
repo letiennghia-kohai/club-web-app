@@ -231,3 +231,93 @@ class MediaService:
     def get_post_media(post_id):
         """Get all media for a post."""
         return Media.query.filter_by(post_id=post_id).order_by(Media.created_at).all()
+    
+    @staticmethod
+    def upload_avatar(file, user_id):
+        """Upload and process user avatar."""
+        if not file:
+            return None, 'Không có file được chọn'
+        
+        # Validate file extension
+        if not allowed_file(file.filename, 'image'):
+            return None, 'Chỉ chấp nhận file ảnh (JPG, PNG, GIF, WebP)'
+        
+        # Validate MIME type
+        if not validate_image_mime(file.content_type):
+            return None, 'Loại file không hợp lệ'
+        
+        # Get file size
+        file.seek(0, 2)
+        file_size = file.tell()
+        file.seek(0)
+        
+        # Avatar max 2MB
+        max_avatar_size = 2 * 1024 * 1024
+        if file_size > max_avatar_size:
+            return None, 'Ảnh đại diện tối đa 2MB'
+        
+        try:
+            # Generate unique filename
+            original_filename = sanitize_filename(file.filename)
+            ext = original_filename.rsplit('.', 1)[1].lower()
+            unique_filename = f'user_{user_id}_{uuid.uuid4().hex}.{ext}'
+            
+            # Create upload path
+            upload_folder = current_app.config['UPLOAD_FOLDER']
+            avatar_folder = os.path.join(upload_folder, 'avatars')
+            os.makedirs(avatar_folder, exist_ok=True)
+            
+            filepath = os.path.join(avatar_folder, unique_filename)
+            
+            # Open and process image
+            image = Image.open(file)
+            
+            # Convert to RGB if necessary
+            if image.mode in ('RGBA', 'LA', 'P'):
+                background = Image.new('RGB', image.size, (255, 255, 255))
+                if image.mode == 'P':
+                    image = image.convert('RGBA')
+                background.paste(image, mask=image.split()[-1] if image.mode == 'RGBA' else None)
+                image = background
+            
+            # Resize to 400x400 (square crop from center)
+            avatar_size = 400
+            width, height = image.size
+            
+            # Crop to square from center
+            if width > height:
+                left = (width - height) // 2
+                image = image.crop((left, 0, left + height, height))
+            elif height > width:
+                top = (height - width) // 2
+                image = image.crop((0, top, width, top + width))
+            
+            # Resize to target size
+            image = image.resize((avatar_size, avatar_size), Image.Resampling.LANCZOS)
+            
+            # Save with optimization
+            image.save(filepath, optimize=True, quality=90)
+            
+            current_app.logger.info(f'Avatar uploaded for user {user_id}: {unique_filename}')
+            
+            return unique_filename, None
+            
+        except Exception as e:
+            current_app.logger.error(f'Error uploading avatar: {str(e)}')
+            return None, 'Lỗi khi upload ảnh đại diện'
+    
+    @staticmethod
+    def delete_avatar(filename):
+        """Delete avatar file."""
+        if not filename:
+            return True, None
+        
+        try:
+            upload_folder = current_app.config['UPLOAD_FOLDER']
+            filepath = os.path.join(upload_folder, 'avatars', filename)
+            if os.path.exists(filepath):
+                os.remove(filepath)
+            return True, None
+        except Exception as e:
+            current_app.logger.error(f'Error deleting avatar: {str(e)}')
+            return False, 'Lỗi khi xóa ảnh đại diện'

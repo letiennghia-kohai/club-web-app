@@ -18,7 +18,12 @@ BELT_ORDER = [
     'Kuy 3',
     'Kuy 2',
     'Kuy 1',
-    'Đen'  # Black belt
+    # Black belt dan ranks
+    'Đai đen nhất đẳng',  # 1st Dan
+    'Đai đen nhị đẳng',   # 2nd Dan
+    'Đai đen tam đẳng',   # 3rd Dan
+    'Đai đen tứ đẳng',    # 4th Dan
+    'Đai đen ngũ đẳng',   # 5th Dan
 ]
 
 
@@ -52,6 +57,7 @@ class User(UserMixin, db.Model):
     date_of_birth = db.Column(db.Date, nullable=True)  # Ngày sinh
     phone_number = db.Column(db.String(15), nullable=True)  # Số điện thoại
     facebook_link = db.Column(db.String(255), nullable=True)  # Facebook/Social media
+    avatar = db.Column(db.String(255), nullable=True)  # Avatar filename
     join_date = db.Column(db.Date, nullable=True)  # Ngày gia nhập
     status = db.Column(db.String(20), nullable=False, default=UserStatus.ACTIVE)
     
@@ -99,3 +105,18 @@ class User(UserMixin, db.Model):
             'status': self.status,
             'created_at': self.created_at.isoformat()
         }
+    
+    def get_avatar_url(self):
+        """Get avatar URL or None if no avatar."""
+        if self.avatar:
+            return f'/static/uploads/avatars/{self.avatar}'
+        return None
+    
+    def get_initials(self):
+        """Get user initials for avatar fallback."""
+        if not self.full_name:
+            return '?'
+        parts = self.full_name.strip().split()
+        if len(parts) >= 2:
+            return f'{parts[0][0]}{parts[-1][0]}'.upper()
+        return self.full_name[0].upper()

@@ -45,6 +45,26 @@ def profile():
         email = request.form.get('email', '').strip()
         student_id = request.form.get('student_id', '').strip()
         
+        # Handle avatar upload
+        avatar_file = request.files.get('avatar')
+        remove_avatar = request.form.get('remove_avatar') == '1'
+        
+        # Update avatar if needed
+        if remove_avatar and current_user.avatar:
+            MediaService.delete_avatar(current_user.avatar)
+            current_user.avatar = None
+        elif avatar_file and avatar_file.filename:
+            # Delete old avatar
+            if current_user.avatar:
+                MediaService.delete_avatar(current_user.avatar)
+            
+            # Upload new avatar
+            new_avatar, error = MediaService.upload_avatar(avatar_file, current_user.id)
+            if error:
+                flash(error, 'danger')
+            else:
+                current_user.avatar = new_avatar
+        
         # Members can only update limited fields
         user, error = UserService.update_user(
             current_user.id,
@@ -107,6 +127,11 @@ def my_posts():
 @login_required
 def create_post():
     """Create new post."""
+    from app.models.tag import Tag
+    from app import db
+    
+    # Get all tags for selection
+    all_tags = Tag.query.order_by(Tag.name).all()
     if request.method == 'POST':
         title = request.form.get('title', '').strip()
         content = request.form.get('content', '').strip()
@@ -127,13 +152,25 @@ def create_post():
         if error:
             flash(error, 'danger')
         else:
+            # Handle tag selection
+            tag_ids = request.form.getlist('tag_ids[]')
+            if tag_ids:
+                for tag_id in tag_ids:
+                    try:
+                        tag = Tag.query.get(int(tag_id))
+                        if tag:
+                            post.tags.append(tag)
+                    except (ValueError, TypeError):
+                        continue
+                db.session.commit()
+            
             if status == PostStatus.PENDING_APPROVAL:
                 flash('Bài viết đã được gửi đi chờ duyệt', 'success')
             else:
                 flash('Bài viết đã được lưu dưới dạng bản nháp', 'success')
             return redirect(url_for('member.edit_post', post_id=post.id))
     
-    return render_template('member/post_editor.html', post=None)
+    return render_template('member/post_editor.html', post=None, all_tags=all_tags)
 
 
 @member_bp.route('/posts/<int:post_id>/edit', methods=['GET', 'POST'])
@@ -162,6 +199,23 @@ def edit_post(post_id):
         if error:
             flash(error, 'danger')
         else:
+            # Update tags
+            from app.models.tag import Tag
+            from app import db
+            
+            tag_ids = request.form.getlist('tag_ids[]')
+            # Clear existing tags
+            post.tags = []
+            # Add selected tags
+            if tag_ids:
+                for tag_id in tag_ids:
+                    try:
+                        tag = Tag.query.get(int(tag_id))
+                        if tag:
+                            post.tags.append(tag)
+                    except (ValueError, TypeError):
+                        continue
+            db.session.commit()
             # Handle action
             if action == 'submit' and post.status == PostStatus.DRAFT:
                 PostService.submit_for_approval(post_id, current_user)
@@ -169,7 +223,11 @@ def edit_post(post_id):
             else:
                 flash('Bài viết đã được cập nhật', 'success')
     
-    return render_template('member/post_editor.html', post=post)
+    # Get all tags for selection
+    from app.models.tag import Tag
+    all_tags = Tag.query.order_by(Tag.name).all()
+    
+    return render_template('member/post_editor.html', post=post, all_tags=all_tags)
 
 
 @member_bp.route('/posts/<int:post_id>/delete', methods=['POST'])
