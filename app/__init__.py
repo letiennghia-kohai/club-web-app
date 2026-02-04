@@ -114,7 +114,14 @@ def create_directories(app):
     ]
     
     for directory in directories:
-        os.makedirs(directory, exist_ok=True)
+        try:
+            os.makedirs(directory, exist_ok=True)
+        except PermissionError:
+            # Railway has read-only filesystem - skip directory creation
+            # Use cloud storage (Cloudinary, S3) for uploads in production
+            if app.logger:
+                app.logger.warning(f'Cannot create {directory} - read-only filesystem')
+            pass
 
 
 def setup_logging(app):
