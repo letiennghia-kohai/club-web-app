@@ -327,17 +327,10 @@ class MediaService:
             return None, 'Ảnh đại diện tối đa 2MB'
         
         try:
-            # Generate unique filename
+            # Generate unique filename (for fallback)
             original_filename = sanitize_filename(file.filename)
             ext = original_filename.rsplit('.', 1)[1].lower()
             unique_filename = f'user_{user_id}_{uuid.uuid4().hex}.{ext}'
-            
-            # Create upload path
-            upload_folder = current_app.config['UPLOAD_FOLDER']
-            avatar_folder = os.path.join(upload_folder, 'avatars')
-            os.makedirs(avatar_folder, exist_ok=True)
-            
-            filepath = os.path.join(avatar_folder, unique_filename)
             
             # Open and process image
             image = Image.open(file)
