@@ -79,13 +79,6 @@ class MediaService:
             ext = original_filename.rsplit('.', 1)[1].lower()
             unique_filename = f'{uuid.uuid4().hex}.{ext}'
             
-            # Create upload path
-            upload_folder = current_app.config['UPLOAD_FOLDER']
-            image_folder = os.path.join(upload_folder, 'images')
-            os.makedirs(image_folder, exist_ok=True)
-            
-            filepath = os.path.join(image_folder, unique_filename)
-            
             # Save and optimize image
             image = Image.open(file)
             
