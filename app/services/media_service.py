@@ -2,7 +2,7 @@
 import os
 import uuid
 from datetime import datetime
-from flask import current_app
+from flask import current_app, url_for
 from PIL import Image
 from werkzeug.utils import secure_filename
 from app import db
@@ -16,6 +16,34 @@ from app.utils.validators import (
     get_video_embed_html,
     sanitize_filename
 )
+
+# Cloudinary import (optional - will use local storage if not configured)
+try:
+    import cloudinary
+    import cloudinary.uploader
+    CLOUDINARY_AVAILABLE = True
+except ImportError:
+    CLOUDINARY_AVAILABLE = False
+
+
+def _use_cloudinary():
+    """Check if Cloudinary should be used."""
+    if not CLOUDINARY_AVAILABLE:
+        return False
+    
+    use_cloudinary = current_app.config.get('USE_CLOUDINARY', False)
+    cloud_name = current_app.config.get('CLOUDINARY_CLOUD_NAME', '')
+    
+    if use_cloudinary and cloud_name:
+        # Configure Cloudinary
+        cloudinary.config(
+            cloud_name=cloud_name,
+            api_key=current_app.config.get('CLOUDINARY_API_KEY', ''),
+            api_secret=current_app.config.get('CLOUDINARY_API_SECRET', '')
+        )
+        return True
+    
+    return False
 
 
 class MediaService:
@@ -76,23 +104,65 @@ class MediaService:
                 new_height = int(image.height * ratio)
                 image = image.resize((max_width, new_height), Image.Resampling.LANCZOS)
             
-            # Save with optimization
-            image.save(filepath, optimize=True, quality=85)
-            
             # Get image dimensions
             width, height = image.size
             
-            # Create media record
-            media = Media(
-                post_id=post_id,
-                type=MediaType.IMAGE,
-                file_path=f'images/{unique_filename}',
-                filename=original_filename,
-                mime_type=file.content_type,
-                file_size=os.path.getsize(filepath),
-                width=width,
-                height=height
-            )
+            # Check if Cloudinary is enabled
+            if _use_cloudinary():
+                # Upload to Cloudinary
+                import io
+                img_byte_arr = io.BytesIO()
+                image.save(img_byte_arr, format='JPEG', quality=85, optimize=True)
+                img_byte_arr.seek(0)
+                
+                result = cloudinary.uploader.upload(
+                    img_byte_arr,
+                    folder='posts',
+                    public_id=f'post_{post_id}_{uuid.uuid4().hex}',
+                    resource_type='image'
+                )
+                
+                # Create media record with Cloudinary URL
+                media = Media(
+                    post_id=post_id,
+                    type=MediaType.IMAGE,
+                    url=result['secure_url'],  # Cloudinary URL
+                    filename=original_filename,
+                    mime_type=file.content_type,
+                    file_size=result.get('bytes', 0),
+                    width=width,
+                    height=height
+                )
+                
+                current_app.logger.info(f'Post image uploaded to Cloudinary: {result["secure_url"]}')
+            
+            else:
+                # Local storage fallback
+                try:
+                    upload_folder = current_app.config['UPLOAD_FOLDER']
+                    image_folder = os.path.join(upload_folder, 'images')
+                    os.makedirs(image_folder, exist_ok=True)
+                    
+                    filepath = os.path.join(image_folder, unique_filename)
+                    image.save(filepath, optimize=True, quality=85)
+                    
+                    # Create media record with local path
+                    media = Media(
+                        post_id=post_id,
+                        type=MediaType.IMAGE,
+                        file_path=f'images/{unique_filename}',
+                        filename=original_filename,
+                        mime_type=file.content_type,
+                        file_size=os.path.getsize(filepath),
+                        width=width,
+                        height=height
+                    )
+                    
+                    current_app.logger.info(f'Post image saved locally: {unique_filename}')
+                
+                except PermissionError:
+                    current_app.logger.error('Cannot save post image - read-only filesystem')
+                    return None, 'Lỗi: Không thể lưu ảnh (cần cấu hình Cloudinary)'
             
             db.session.add(media)
             db.session.commit()
@@ -295,16 +365,46 @@ class MediaService:
             # Resize to target size
             image = image.resize((avatar_size, avatar_size), Image.Resampling.LANCZOS)
             
-            # Save with optimization
-            image.save(filepath, optimize=True, quality=90)
+            # Check if Cloudinary is enabled
+            if _use_cloudinary():
+                # Upload to Cloudinary
+                import io
+                img_byte_arr = io.BytesIO()
+                image.save(img_byte_arr, format='JPEG', quality=90, optimize=True)
+                img_byte_arr.seek(0)
+                
+                result = cloudinary.uploader.upload(
+                    img_byte_arr,
+                    folder='avatars',
+                    public_id=f'user_{user_id}_{uuid.uuid4().hex}',
+                    overwrite=True,
+                    resource_type='image'
+                )
+                
+                avatar_url = result['secure_url']
+                current_app.logger.info(f'Avatar uploaded to Cloudinary for user {user_id}')
+                return avatar_url, None
             
-            current_app.logger.info(f'Avatar uploaded for user {user_id}: {unique_filename}')
-            
-            return unique_filename, None
+            else:
+                # Local storage fallback
+                try:
+                    upload_folder = current_app.config['UPLOAD_FOLDER']
+                    avatar_folder = os.path.join(upload_folder, 'avatars')
+                    os.makedirs(avatar_folder, exist_ok=True)
+                    
+                    filepath = os.path.join(avatar_folder, unique_filename)
+                    image.save(filepath, optimize=True, quality=90)
+                    
+                    current_app.logger.info(f'Avatar uploaded locally for user {user_id}: {unique_filename}')
+                    return unique_filename, None
+                    
+                except PermissionError:
+                    current_app.logger.error('Cannot save avatar - read-only filesystem. Enable Cloudinary!')
+                    return None, 'Lỗi: Không thể lưu ảnh (cần cấu hình Cloudinary cho production)'
             
         except Exception as e:
             current_app.logger.error(f'Error uploading avatar: {str(e)}')
-            return None, 'Lỗi khi upload ảnh đại diện'
+            return None, f'Lỗi khi upload ảnh: {str(e)}'
     
     @staticmethod
     def delete_avatar(filename):

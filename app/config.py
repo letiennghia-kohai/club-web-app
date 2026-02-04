@@ -37,6 +37,12 @@ class Config:
     )
     MAX_IMAGES_PER_POST = int(os.getenv('MAX_IMAGES_PER_POST', 5))
     
+    # Cloudinary (Cloud Storage)
+    USE_CLOUDINARY = os.getenv('USE_CLOUDINARY', 'False') == 'True'
+    CLOUDINARY_CLOUD_NAME = os.getenv('CLOUDINARY_CLOUD_NAME', '')
+    CLOUDINARY_API_KEY = os.getenv('CLOUDINARY_API_KEY', '')
+    CLOUDINARY_API_SECRET = os.getenv('CLOUDINARY_API_SECRET', '')
+    
     # Security
     WTF_CSRF_ENABLED = os.getenv('WTF_CSRF_ENABLED', 'True') == 'True'
     SESSION_COOKIE_SECURE = os.getenv('SESSION_COOKIE_SECURE', 'False') == 'True'

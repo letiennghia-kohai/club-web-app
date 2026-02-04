@@ -14,10 +14,12 @@ psycopg2-binary==2.9.9  # For production PostgreSQL (Railway, Render)
 Werkzeug==3.0.1
 WTForms==3.1.1
 email-validator==2.1.0
-Flask-Limiter==3.5.0
+Flask-Limiter==3.5.0
+
 
 # Media handling
 Pillow==10.1.0
+cloudinary==1.40.0
 
 # Markdown
 markdown==3.5.1
