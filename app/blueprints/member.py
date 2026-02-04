@@ -99,8 +99,11 @@ def change_password():
             flash('Mật khẩu mới không khớp', 'warning')
             return render_template('member/change_password.html')
         
-        if len(new_password) < 6:
-            flash('Mật khẩu mới phải có ít nhất 6 ký tự', 'warning')
+        # Validate password strength
+        from app.utils.password_validator import validate_password_strength
+        is_valid, error_msg = validate_password_strength(new_password)
+        if not is_valid:
+            flash(error_msg, 'warning')
             return render_template('member/change_password.html')
         
         success, error = UserService.change_password(current_user.id, old_password, new_password)

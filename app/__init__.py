@@ -7,12 +7,19 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_migrate import Migrate
 from flask_wtf.csrf import CSRFProtect
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 # Initialize extensions
 db = SQLAlchemy()
 login_manager = LoginManager()
 migrate = Migrate()
 csrf = CSRFProtect()
+limiter = Limiter(
+    key_func=get_remote_address,
+    default_limits=["200 per day", "50 per hour"],
+    storage_uri="memory://"
+)
 
 
 def create_app(config_name=None):
@@ -30,6 +37,7 @@ def create_app(config_name=None):
     login_manager.init_app(app)
     migrate.init_app(app, db)
     csrf.init_app(app)
+    limiter.init_app(app)
     
     # Configure login manager
     login_manager.login_view = 'auth.login'
@@ -57,6 +65,9 @@ def create_app(config_name=None):
     # Register CLI commands
     register_commands(app)
     
+    # Add security headers
+    add_security_headers(app)
+    
     return app
 
 
@@ -78,93 +89,78 @@ def register_blueprints(app):
 def register_error_handlers(app):
     """Register error handlers."""
     
-    @app.errorhandler(403)
-    def forbidden(e):
-        return render_template('errors/403.html'), 403
-    
     @app.errorhandler(404)
-    def not_found(e):
+    def not_found(error):
         return render_template('errors/404.html'), 404
     
+    @app.errorhandler(403)
+    def forbidden(error):
+        return render_template('errors/403.html'), 403
+    
     @app.errorhandler(500)
-    def internal_error(e):
+    def internal_error(error):
         db.session.rollback()
         return render_template('errors/500.html'), 500
 
 
+def create_directories(app):
+    """Create necessary directories."""
+    directories = [
+        app.config['UPLOAD_FOLDER'],
+        os.path.join(app.config['UPLOAD_FOLDER'], 'images'),
+        os.path.join(app.config['UPLOAD_FOLDER'], 'videos'),
+        os.path.join(app.config['UPLOAD_FOLDER'], 'avatars'),
+        'logs'
+    ]
+    
+    for directory in directories:
+        os.makedirs(directory, exist_ok=True)
+
+
 def setup_logging(app):
-    """Configure application logging."""
+    """Setup application logging."""
     if not app.debug:
         # Create logs directory if it doesn't exist
         if not os.path.exists('logs'):
             os.mkdir('logs')
         
-        # File handler for all logs
+        # Setup file handler
         file_handler = RotatingFileHandler(
-            'logs/app.log',
+            app.config.get('LOG_FILE', 'logs/app.log'),
             maxBytes=10240000,  # 10MB
-            backupCount=5
+            backupCount=10
         )
         file_handler.setFormatter(logging.Formatter(
-            '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
+            '[%(asctime)s] %(levelname)s in %(module)s: %(message)s'
         ))
         file_handler.setLevel(logging.INFO)
         app.logger.addHandler(file_handler)
-        
-        # Error file handler
-        error_handler = RotatingFileHandler(
-            'logs/error.log',
-            maxBytes=10240000,
-            backupCount=5
-        )
-        error_handler.setFormatter(logging.Formatter(
-            '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
-        ))
-        error_handler.setLevel(logging.ERROR)
-        app.logger.addHandler(error_handler)
-        
         app.logger.setLevel(logging.INFO)
         app.logger.info('CLB Karate Bách Khoa startup')
 
 
-def create_directories(app):
-    """Create necessary directories."""
-    upload_folder = app.config.get('UPLOAD_FOLDER')
-    if upload_folder and not os.path.exists(upload_folder):
-        os.makedirs(upload_folder, exist_ok=True)
-        # Create subdirectories
-        os.makedirs(os.path.join(upload_folder, 'images'), exist_ok=True)
-        os.makedirs(os.path.join(upload_folder, 'videos'), exist_ok=True)
-
-
 def register_template_filters(app):
-    """Register custom Jinja2 template filters."""
-    from app.utils.helpers import markdown_to_html, format_datetime, truncate_text
+    """Register custom template filters."""
+    from app.utils.helpers import (
+        format_date,
+        format_datetime,
+        get_belt_color_class,
+        markdown_to_html
+    )
     
-    @app.template_filter('markdown')
-    def markdown_filter(text):
-        """Convert markdown to HTML."""
-        return markdown_to_html(text)
-    
-    @app.template_filter('datetime')
-    def datetime_filter(value, format='%d/%m/%Y %H:%M'):
-        """Format datetime."""
-        return format_datetime(value, format)
-    
-    @app.template_filter('truncate_words')
-    def truncate_words_filter(text, length=50):
-        """Truncate text to specified length."""
-        return truncate_text(text, length)
+    app.jinja_env.filters['format_date'] = format_date
+    app.jinja_env.filters['format_datetime'] = format_datetime
+    app.jinja_env.filters['markdown'] = markdown_to_html
+    app.jinja_env.globals['get_belt_color_class'] = get_belt_color_class
 
 
 def register_context_processors(app):
-    """Register template context processors."""
-    from app.utils.helpers import get_belt_color_class
+    """Register context processors."""
     from app.models.user import BELT_ORDER
+    from app.utils.helpers import get_belt_color_class
     
     @app.context_processor
-    def utility_processor():
-        """Make utility functions available in all templates."""
+    def inject_belt_data():
         return {
             'get_belt_color_class': get_belt_color_class,
             'BELT_ORDER': BELT_ORDER
@@ -188,8 +184,28 @@ def register_commands(app):
         print('Database seeded successfully.')
 
 
+def add_security_headers(app):
+    """Add security headers to all responses."""
+    @app.after_request
+    def security_headers(response):
+        # Prevent MIME sniffing
+        response.headers['X-Content-Type-Options'] = 'nosniff'
+        
+        # Prevent clickjacking
+        response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+        
+        # Enable XSS protection
+        response.headers['X-XSS-Protection'] = '1; mode=block'
+        
+        # HSTS for HTTPS (only in production)
+        if app.config.get('SESSION_COOKIE_SECURE'):
+            response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+        
+        return response
+
+
 @login_manager.user_loader
 def load_user(user_id):
-    """Load user by ID for Flask-Login."""
+    """Load user for Flask-Login."""
     from app.models.user import User
     return User.query.get(int(user_id))
