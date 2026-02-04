@@ -45,15 +45,14 @@
                     {% if images %}
                     <div class="mb-4">
                         {% if images|length == 1 %}
-                        <img src="{{ url_for('static', filename='uploads/' + images[0].file_path) }}"
-                            class="img-fluid rounded" alt="{{ post.title }}" style="width: 100%;">
+                        <img src="{{ images[0].get_url() }}" class="img-fluid rounded" alt="{{ post.title }}"
+                            style="width: 100%;">
                         {% else %}
                         <div id="postCarousel" class="carousel slide" data-bs-ride="carousel">
                             <div class="carousel-inner">
                                 {% for img in images %}
                                 <div class="carousel-item {% if loop.first %}active{% endif %}">
-                                    <img src="{{ url_for('static', filename='uploads/' + img.file_path) }}"
-                                        class="d-block w-100 rounded" alt="{{ post.title }}">
+                                    <img src="{{ img.get_url() }}" class="d-block w-100 rounded" alt="{{ post.title }}">
                                 </div>
                                 {% endfor %}
                             </div>

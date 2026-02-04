@@ -51,8 +51,7 @@ endblock %}
                             <div class="row g-2">
                                 {% for img in images %}
                                 <div class="col-md-3">
-                                    <img src="{{ url_for('static', filename='uploads/' + img.file_path) }}"
-                                        class="img-fluid rounded" alt="Image">
+                                    <img src="{{ img.get_url() }}" class="img-fluid rounded" alt="Image">
                                 </div>
                                 {% endfor %}
                             </div>

@@ -34,8 +34,7 @@
             <div class="card post-card fade-in">
                 {% set images = post.get_media_images() %}
                 {% if images %}
-                <img src="{{ url_for('static', filename='uploads/' + images[0].file_path) }}" class="post-card-image"
-                    alt="{{ post.title }}">
+                <img src="{{ images[0].get_url() }}" class="post-card-image" alt="{{ post.title }}">
                 {% else %}
                 <div class="post-card-image" style="background: var(--gradient-primary);"></div>
                 {% endif %}
