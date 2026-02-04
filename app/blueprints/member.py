@@ -1,6 +1,7 @@
 """Member blueprint."""
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import current_user
+from app import db
 from app.middleware import login_required
 from app.models.post import Post, PostStatus
 from app.services.post_service import PostService
