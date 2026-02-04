@@ -141,7 +141,7 @@ def setup_logging(app):
 
 def register_template_filters(app):
     """Register custom template filters."""
-    from app.utils.template_filters import (
+    from app.utils.helpers import (
         format_date,
         format_datetime,
         format_belt,
@@ -159,7 +159,7 @@ def register_template_filters(app):
 def register_context_processors(app):
     """Register context processors."""
     from app.models.belt import BELT_ORDER
-    from app.utils.template_filters import get_belt_color_class
+    from app.utils.helpers import get_belt_color_class
     
     @app.context_processor
     def inject_belt_data():
