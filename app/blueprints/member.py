@@ -64,6 +64,8 @@ def profile():
                 flash(error, 'danger')
             else:
                 current_user.avatar = new_avatar
+                # Commit avatar change immediately
+                db.session.commit()
         
         # Members can only update limited fields
         user, error = UserService.update_user(
@@ -78,7 +80,7 @@ def profile():
         else:
             flash('Thông tin cá nhân đã được cập nhật', 'success')
             return redirect(url_for('member.profile'))
-    
+
     return render_template('member/profile.html')
 
 
