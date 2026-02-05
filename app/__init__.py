@@ -73,16 +73,18 @@ def create_app(config_name=None):
 
 def register_blueprints(app):
     """Register Flask blueprints."""
-    from app.blueprints.auth import auth_bp
-    from app.blueprints.admin import admin_bp
-    from app.blueprints.member import member_bp
-    from app.blueprints.post import post_bp
     from app.blueprints.public import public_bp
+    from app.blueprints.auth import auth_bp
+    from app.blueprints.member import member_bp
+    from app.blueprints.admin import admin_bp
+    from app.blueprints.notification import notification_bp
+    from app.blueprints.post import post_bp
     
     app.register_blueprint(public_bp)
     app.register_blueprint(auth_bp, url_prefix='/auth')
-    app.register_blueprint(admin_bp, url_prefix='/admin')
     app.register_blueprint(member_bp, url_prefix='/member')
+    app.register_blueprint(admin_bp, url_prefix='/admin')
+    app.register_blueprint(notification_bp)
     app.register_blueprint(post_bp, url_prefix='/posts')
 
 

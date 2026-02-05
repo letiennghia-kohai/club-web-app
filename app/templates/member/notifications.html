@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Thông báo - CLB Karatedo Bách Khoa Hà Nội{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="bi bi-bell"></i> Thông báo</h2>
+                {% if unread_count > 0 %}
+                <button class="btn btn-sm btn-outline-primary" id="markAllRead">
+                    <i class="bi bi-check2-all"></i> Đánh dấu tất cả đã đọc
+                </button>
+                {% endif %}
+            </div>
+
+            {% if notifications %}
+            <div class="list-group">
+                {% for notif in notifications %}
+                <a href="{{ notif.link }}"
+                    class="list-group-item list-group-item-action {% if not notif.is_read %}list-group-item-primary{% endif %}"
+                    data-notification-id="{{ notif.id }}" onclick="markAsRead({{ notif.id }})">
+                    <div class="d-flex w-100 justify-content-between align-items-start">
+                        <div>
+                            <div class="d-flex align-items-center mb-1">
+                                {% if notif.type.value == 'admin_post' %}
+                                <i class="bi bi-megaphone text-primary me-2"></i>
+                                {% else %}
+                                <i class="bi bi-chat-dots text-success me-2"></i>
+                                {% endif %}
+                                <h6 class="mb-0">{{ notif.title }}</h6>
+                                {% if not notif.is_read %}
+                                <span class="badge bg-danger ms-2" style="font-size: 0.65rem;">Mới</span>
+                                {% endif %}
+                            </div>
+                            <p class="mb-1 text-muted">{{ notif.message }}</p>
+                        </div>
+                        <small class="text-muted">{{ notif.get_time_ago() }}</small>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-bell-slash display-1 text-muted"></i>
+                <p class="text-muted mt-3">Bạn chưa có thông báo nào</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    // Mark single notification as read
+    function markAsRead(notificationId) {
+        fetch(`/api/notifications/${notificationId}/read`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        }).then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Remove badge and highlight
+                    const notifElement = document.querySelector(`[data-notification-id="${notificationId}"]`);
+                    if (notifElement) {
+                        notifElement.classList.remove('list-group-item-primary');
+                        const badge = notifElement.querySelector('.badge');
+                        if (badge) badge.remove();
+                    }
+                }
+            });
+    }
+
+    // Mark all as read
+    document.getElementById('markAllRead')?.addEventListener('click', function (e) {
+        e.preventDefault();
+        fetch('/api/notifications/read-all', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        }).then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                }
+            });
+    });
+</script>
+{% endblock %}
