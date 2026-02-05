@@ -43,9 +43,12 @@ def api_notifications():
 @login_required
 def mark_as_read(notification_id):
     """Mark single notification as read."""
+    from app import db
     success, error = NotificationService.mark_as_read(notification_id, current_user.id)
     
     if success:
+        # Force refresh the session to get updated notification data
+        db.session.expire_all()
         return jsonify({'success': True})
     else:
         return jsonify({'success': False, 'error': error}), 400
@@ -55,9 +58,12 @@ def mark_as_read(notification_id):
 @login_required
 def mark_all_as_read():
     """Mark all notifications as read."""
+    from app import db
     success, error = NotificationService.mark_all_as_read(current_user.id)
     
     if success:
+        # Force refresh the session to get updated notification data
+        db.session.expire_all()
         return jsonify({'success': True})
     else:
         return jsonify({'success': False, 'error': error}), 400

@@ -167,6 +167,7 @@ def register_context_processors(app):
     """Register context processors."""
     from app.models.user import BELT_ORDER
     from app.utils.helpers import get_belt_color_class
+    from flask_login import current_user
     
     @app.context_processor
     def inject_belt_data():
@@ -174,6 +175,15 @@ def register_context_processors(app):
             'get_belt_color_class': get_belt_color_class,
             'BELT_ORDER': BELT_ORDER
         }
+    
+    @app.context_processor
+    def inject_notification_count():
+        """Inject unread notification count for authenticated users."""
+        if current_user.is_authenticated:
+            from app.services.notification_service import NotificationService
+            unread_count = NotificationService.get_unread_count(current_user.id)
+            return {'navbar_unread_count': unread_count}
+        return {'navbar_unread_count': 0}
 
 
 def register_commands(app):
