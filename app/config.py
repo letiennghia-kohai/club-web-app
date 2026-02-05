@@ -35,7 +35,7 @@ class Config:
     ALLOWED_VIDEO_EXTENSIONS = set(
         os.getenv('ALLOWED_VIDEO_EXTENSIONS', 'mp4,webm').split(',')
     )
-    MAX_IMAGES_PER_POST = int(os.getenv('MAX_IMAGES_PER_POST', 5))
+    MAX_IMAGES_PER_POST = int(os.getenv('MAX_IMAGES_PER_POST', 20))
     
     # Cloudinary (Cloud Storage)
     USE_CLOUDINARY = os.getenv('USE_CLOUDINARY', 'False') == 'True'
