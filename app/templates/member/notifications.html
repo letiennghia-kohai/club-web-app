@@ -18,10 +18,10 @@
             {% if notifications %}
             <div class="list-group">
                 {% for notif in notifications %}
-                <a href="{{ notif.link }}"
+                <a href="javascript:void(0);"
                     class="list-group-item list-group-item-action {% if not notif.is_read %}list-group-item-primary{% endif %}"
                     data-notification-id="{{ notif.id }}" data-is-read="{{ notif.is_read|lower }}"
-                    onclick="markAsRead({{ notif.id }}); return true;">
+                    data-link="{{ notif.link }}" onclick="markAsRead({{ notif.id }}, this);">
                     <div class="d-flex w-100 justify-content-between align-items-start">
                         <div>
                             <div class="d-flex align-items-center mb-1">
@@ -55,43 +55,61 @@
 <script>
     // Biến theo dõi số lượng chưa đọc
     var currentUnreadCount = {{ unread_count }};
+    console.log('Initial unread count:', currentUnreadCount);
 
     // Update badge count in navbar
     function updateBadgeCount(newCount) {
-        // Tìm badge trong navbar (từ base.html)
-        const navBellLink = document.querySelector('.nav-link[href="{{ url_for("notification.notifications") }}"]');
+        console.log('Updating badge to:', newCount);
 
-        if (!navBellLink) return;
+        // Tìm tất cả các link bell có thể có
+        const navBellLink = document.querySelector('.navbar .nav-link .bi-bell');
+        console.log('Bell icon found:', navBellLink);
 
-        let badge = navBellLink.querySelector('.badge.bg-danger');
+        if (!navBellLink) {
+            console.error('Bell icon not found in navbar');
+            return;
+        }
+
+        const bellParent = navBellLink.parentElement;
+        console.log('Bell parent element:', bellParent);
+
+        let badge = bellParent.querySelector('.badge');
+        console.log('Current badge:', badge);
 
         if (newCount === 0) {
             // Xóa badge nếu không còn thông báo chưa đọc
             if (badge) {
+                console.log('Removing badge');
                 badge.remove();
             }
         } else {
             if (badge) {
                 // Cập nhật số lượng trong badge hiện tại
+                console.log('Updating existing badge from', badge.textContent, 'to', newCount);
                 badge.textContent = newCount < 100 ? newCount : '99+';
             } else {
                 // Tạo badge mới nếu chưa có
+                console.log('Creating new badge');
                 const newBadge = document.createElement('span');
                 newBadge.className = 'position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger';
                 newBadge.style.fontSize = '0.65rem';
                 newBadge.style.padding = '0.25em 0.5em';
                 newBadge.textContent = newCount < 100 ? newCount : '99+';
-                navBellLink.appendChild(newBadge);
+                bellParent.appendChild(newBadge);
             }
         }
     }
 
     // Mark single notification as read
-    function markAsRead(notificationId) {
-        const notifElement = document.querySelector('[data-notification-id="' + notificationId + '"]');
+    function markAsRead(notificationId, element) {
+        console.log('markAsRead called for notification:', notificationId);
+        console.log('Element:', element);
+        console.log('Is read:', element.getAttribute('data-is-read'));
 
         // Kiểm tra xem thông báo này đã được đọc chưa
-        if (notifElement && notifElement.getAttribute('data-is-read') === 'false') {
+        if (element.getAttribute('data-is-read') === 'false') {
+            console.log('Marking as read...');
+
             fetch('/api/notifications/' + notificationId + '/read', {
                 method: 'POST',
                 headers: {
@@ -99,27 +117,47 @@
                 }
             })
                 .then(function (response) {
+                    console.log('Response status:', response.status);
                     return response.json();
                 })
                 .then(function (data) {
+                    console.log('Response data:', data);
+
                     if (data.success) {
                         // Cập nhật UI của item trong danh sách
-                        notifElement.classList.remove('list-group-item-primary');
-                        const badge = notifElement.querySelector('.badge');
+                        element.classList.remove('list-group-item-primary');
+                        const badge = element.querySelector('.badge');
                         if (badge) badge.remove();
 
-                        // Đánh dấu là đã đọc để tránh gọi API lại
-                        notifElement.setAttribute('data-is-read', 'true');
+                        // Đánh dấu là đã đọc
+                        element.setAttribute('data-is-read', 'true');
 
-                        // Giảm số lượng chưa đọc và cập nhật badge ở navbar
+                        // Giảm số lượng chưa đọc và cập nhật badge
                         currentUnreadCount--;
                         if (currentUnreadCount < 0) currentUnreadCount = 0;
+                        console.log('New unread count:', currentUnreadCount);
+
                         updateBadgeCount(currentUnreadCount);
+
+                        // Chuyển đến link sau khi đánh dấu thành công
+                        setTimeout(function () {
+                            const link = element.getAttribute('data-link');
+                            if (link) {
+                                window.location.href = link;
+                            }
+                        }, 300);
                     }
                 })
                 .catch(function (error) {
                     console.error('Error marking notification as read:', error);
                 });
+        } else {
+            console.log('Already read, navigating to link...');
+            // Nếu đã đọc rồi, chỉ cần chuyển trang
+            const link = element.getAttribute('data-link');
+            if (link) {
+                window.location.href = link;
+            }
         }
     }
 
@@ -128,6 +166,8 @@
     if (markAllBtn) {
         markAllBtn.addEventListener('click', function (e) {
             e.preventDefault();
+            console.log('Mark all as read clicked');
+
             fetch('/api/notifications/read-all', {
                 method: 'POST',
                 headers: {
@@ -135,16 +175,21 @@
                 }
             })
                 .then(function (response) {
+                    console.log('Mark all response status:', response.status);
                     return response.json();
                 })
                 .then(function (data) {
+                    console.log('Mark all response data:', data);
+
                     if (data.success) {
                         // Cập nhật badge về 0
                         currentUnreadCount = 0;
                         updateBadgeCount(0);
 
-                        // Reload trang để hiển thị tất cả thông báo đã đọc
-                        location.reload();
+                        // Reload trang
+                        setTimeout(function () {
+                            location.reload();
+                        }, 300);
                     }
                 })
                 .catch(function (error) {
