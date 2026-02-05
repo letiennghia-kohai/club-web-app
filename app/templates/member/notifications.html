@@ -75,6 +75,8 @@
     }
 
     // Mark single notification as read
+    var UNREAD_COUNT = {{ unread_count }};
+
     function markAsRead(notificationId) {
         fetch('/api/notifications/' + notificationId + '/read', {
             method: 'POST',
@@ -95,14 +97,12 @@
                     }
 
                     // Update badge count
-                    var currentUnread = {{ unread_count }
-                };
-                updateBadgeCount(currentUnread - 1);
-            }
-        })
-        .catch (function (error) {
-        console.error('Error marking notification as read:', error);
-    });
+                    updateBadgeCount(UNREAD_COUNT - 1);
+                }
+            })
+            .catch(function (error) {
+                console.error('Error marking notification as read:', error);
+            });
     }
 
     // Mark all as read
