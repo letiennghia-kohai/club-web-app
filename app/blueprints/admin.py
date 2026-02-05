@@ -8,6 +8,7 @@ from app.models.comment import Comment
 from app.models.media import Media
 from app.services.post_service import PostService
 from app.services.user_service import UserService
+from app.services.notification_service import NotificationService
 from app import db
 from datetime import date
 
@@ -365,6 +366,10 @@ def create_post():
                 flash(f'Lỗi embed video: {error}', 'warning')
         
         db.session.commit()
+        
+        # Send notifications to all users about new admin post
+        NotificationService.notify_all_users(post)
+        
         flash(f'Bài viết "{post.title}" đã được đăng và công khai', 'success')
         return redirect(url_for('admin.dashboard'))
     

@@ -1,10 +1,12 @@
 """Public blueprint."""
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, flash, redirect, url_for
 from flask_login import current_user
+from app import db
 from app.models.post import Post, PostStatus
 from app.models.comment import Comment
+from app.models.tag import Tag
+from app.services.notification_service import NotificationService
 from app.services.post_service import PostService
-from app import db
 
 public_bp = Blueprint('public', __name__)
 
@@ -12,7 +14,6 @@ public_bp = Blueprint('public', __name__)
 @public_bp.route('/')
 def index():
     """Homepage with published posts."""
-    from app.models.tag import Tag
     
     page = request.args.get('page', 1, type=int)
     tag_slug = request.args.get('tag', None)
@@ -108,6 +109,10 @@ def add_comment(post_id):
         
         db.session.add(comment)
         db.session.commit()
+        
+        # Notify post author about new comment
+        if current_user.is_authenticated:
+            NotificationService.notify_post_author(comment)
         
         flash('Bình luận của bạn đã được thêm', 'success')
         

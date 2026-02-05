@@ -18,5 +18,9 @@ fi
 
 echo "Starting application on port $PORT..."
 
+# Run database migrations
+echo "Running database migrations..."
+flask db upgrade
+
 # Run Gunicorn with dynamic port
 exec gunicorn --bind 0.0.0.0:$PORT --workers 4 --timeout 120 --access-logfile - --error-logfile - wsgi:application
