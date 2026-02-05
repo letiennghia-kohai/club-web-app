@@ -55,15 +55,11 @@
 <script>
     // Biến theo dõi số lượng chưa đọc
     var currentUnreadCount = {{ unread_count }};
-    console.log('Initial unread count:', currentUnreadCount);
 
     // Update badge count in navbar
     function updateBadgeCount(newCount) {
-        console.log('Updating badge to:', newCount);
-
-        // Tìm tất cả các link bell có thể có
+        // Tìm icon bell trong navbar
         const navBellLink = document.querySelector('.navbar .nav-link .bi-bell');
-        console.log('Bell icon found:', navBellLink);
 
         if (!navBellLink) {
             console.error('Bell icon not found in navbar');
@@ -71,25 +67,19 @@
         }
 
         const bellParent = navBellLink.parentElement;
-        console.log('Bell parent element:', bellParent);
-
         let badge = bellParent.querySelector('.badge');
-        console.log('Current badge:', badge);
 
         if (newCount === 0) {
             // Xóa badge nếu không còn thông báo chưa đọc
             if (badge) {
-                console.log('Removing badge');
                 badge.remove();
             }
         } else {
             if (badge) {
                 // Cập nhật số lượng trong badge hiện tại
-                console.log('Updating existing badge from', badge.textContent, 'to', newCount);
                 badge.textContent = newCount < 100 ? newCount : '99+';
             } else {
                 // Tạo badge mới nếu chưa có
-                console.log('Creating new badge');
                 const newBadge = document.createElement('span');
                 newBadge.className = 'position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger';
                 newBadge.style.fontSize = '0.65rem';
@@ -102,27 +92,23 @@
 
     // Mark single notification as read
     function markAsRead(notificationId, element) {
-        console.log('markAsRead called for notification:', notificationId);
-        console.log('Element:', element);
-        console.log('Is read:', element.getAttribute('data-is-read'));
-
         // Kiểm tra xem thông báo này đã được đọc chưa
         if (element.getAttribute('data-is-read') === 'false') {
-            console.log('Marking as read...');
-
             fetch('/api/notifications/' + notificationId + '/read', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                }
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                credentials: 'same-origin'
             })
                 .then(function (response) {
-                    console.log('Response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error('HTTP error! status: ' + response.status);
+                    }
                     return response.json();
                 })
                 .then(function (data) {
-                    console.log('Response data:', data);
-
                     if (data.success) {
                         // Cập nhật UI của item trong danh sách
                         element.classList.remove('list-group-item-primary');
@@ -135,8 +121,6 @@
                         // Giảm số lượng chưa đọc và cập nhật badge
                         currentUnreadCount--;
                         if (currentUnreadCount < 0) currentUnreadCount = 0;
-                        console.log('New unread count:', currentUnreadCount);
-
                         updateBadgeCount(currentUnreadCount);
 
                         // Chuyển đến link sau khi đánh dấu thành công
@@ -152,7 +136,6 @@
                     console.error('Error marking notification as read:', error);
                 });
         } else {
-            console.log('Already read, navigating to link...');
             // Nếu đã đọc rồi, chỉ cần chuyển trang
             const link = element.getAttribute('data-link');
             if (link) {
@@ -166,21 +149,22 @@
     if (markAllBtn) {
         markAllBtn.addEventListener('click', function (e) {
             e.preventDefault();
-            console.log('Mark all as read clicked');
 
             fetch('/api/notifications/read-all', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                }
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                credentials: 'same-origin'
             })
                 .then(function (response) {
-                    console.log('Mark all response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error('HTTP error! status: ' + response.status);
+                    }
                     return response.json();
                 })
                 .then(function (data) {
-                    console.log('Mark all response data:', data);
-
                     if (data.success) {
                         // Cập nhật badge về 0
                         currentUnreadCount = 0;
@@ -194,6 +178,7 @@
                 })
                 .catch(function (error) {
                     console.error('Error marking all as read:', error);
+                    alert('Có lỗi xảy ra. Vui lòng thử lại!');
                 });
         });
     }
