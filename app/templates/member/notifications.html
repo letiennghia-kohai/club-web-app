@@ -56,6 +56,12 @@
     // Biến theo dõi số lượng chưa đọc
     var currentUnreadCount = {{ unread_count }};
 
+    // Get CSRF token from meta tag
+    function getCsrfToken() {
+        const meta = document.querySelector('meta[name="csrf-token"]');
+        return meta ? meta.getAttribute('content') : '';
+    }
+
     // Update badge count in navbar
     function updateBadgeCount(newCount) {
         // Tìm icon bell trong navbar
@@ -98,7 +104,8 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': getCsrfToken()
                 },
                 credentials: 'same-origin'
             })
@@ -154,7 +161,8 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': getCsrfToken()
                 },
                 credentials: 'same-origin'
             })
