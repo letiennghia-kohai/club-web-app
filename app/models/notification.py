@@ -17,7 +17,7 @@ class Notification(db.Model):
     __tablename__ = 'notification'
     
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE'), nullable=False, index=True)
+    user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False, index=True)
     type = Column(SQLEnum(NotificationType), nullable=False)
     title = Column(String(200), nullable=False)
     message = Column(String(500), nullable=False)
