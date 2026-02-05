@@ -52,6 +52,31 @@
 </div>
 
 <script>
+    // Update badge count in navbar
+    function updateBadgeCount(newCount) {
+        const badge = document.querySelector('.nav-link .badge.bg-danger');
+        if (newCount === 0) {
+            // Remove badge if no unread notifications
+            if (badge) badge.remove();
+        } else {
+            if (badge) {
+                // Update existing badge
+                badge.textContent = newCount < 100 ? newCount : '99+';
+            } else {
+                // Create badge if it doesn't exist
+                const bellLink = document.querySelector('.nav-link[href="{{ url_for("notification.notifications") }}"]');
+                if (bellLink) {
+                    const newBadge = document.createElement('span');
+                    newBadge.className = 'position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger';
+                    newBadge.style.fontSize = '0.65rem';
+                    newBadge.style.padding = '0.25em 0.5em';
+                    newBadge.textContent = newCount < 100 ? newCount : '99+';
+                    bellLink.appendChild(newBadge);
+                }
+            }
+        }
+    }
+
     // Mark single notification as read
     function markAsRead(notificationId) {
         fetch(`/api/notifications/${notificationId}/read`, {
@@ -62,16 +87,21 @@
         }).then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Remove badge and highlight
+                    // Remove badge and highlight from notification
                     const notifElement = document.querySelector(`[data-notification-id="${notificationId}"]`);
                     if (notifElement) {
                         notifElement.classList.remove('list-group-item-primary');
                         const badge = notifElement.querySelector('.badge');
                         if (badge) badge.remove();
                     }
-                }
-            });
-    }
+
+                    // Update badge count
+                    const currentUnread = {{ unread_count }
+                };
+                updateBadgeCount(currentUnread - 1);
+            }
+      });
+}
 
     // Mark all as read
     document.getElementById('markAllRead')?.addEventListener('click', function (e) {
@@ -84,6 +114,9 @@
         }).then(response => response.json())
             .then(data => {
                 if (data.success) {
+                    // Update badge to 0
+                    updateBadgeCount(0);
+                    // Reload to show updated UI
                     location.reload();
                 }
             });
