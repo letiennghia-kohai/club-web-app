@@ -81,24 +81,29 @@
             headers: {
                 'Content-Type': 'application/json',
             }
-        }).then(function (response) {
-            return response.json();
-        }).then(function (data) {
-            if (data.success) {
-                const notifElement = document.querySelector('[data-notification-id="' + notificationId + '"]');
-                if (notifElement) {
-                    notifElement.classList.remove('list-group-item-primary');
-                    const badge = notifElement.querySelector('.badge');
-                    if (badge) badge.remove();
-                }
+        })
+            .then(function (response) {
+                return response.json();
+            })
+            .then(function (data) {
+                if (data.success) {
+                    const notifElement = document.querySelector('[data-notification-id="' + notificationId + '"]');
+                    if (notifElement) {
+                        notifElement.classList.remove('list-group-item-primary');
+                        const badge = notifElement.querySelector('.badge');
+                        if (badge) badge.remove();
+                    }
 
-                // Update badge count
-                var currentUnread = {{ unread_count }
-            };
-            updateBadgeCount(currentUnread - 1);
-        }
+                    // Update badge count
+                    var currentUnread = {{ unread_count }
+                };
+                updateBadgeCount(currentUnread - 1);
+            }
+        })
+        .catch (function (error) {
+        console.error('Error marking notification as read:', error);
     });
-}
+    }
 
     // Mark all as read
     var markAllBtn = document.getElementById('markAllRead');
