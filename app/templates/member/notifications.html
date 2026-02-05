@@ -20,7 +20,7 @@
                 {% for notif in notifications %}
                 <a href="{{ notif.link }}"
                     class="list-group-item list-group-item-action {% if not notif.is_read %}list-group-item-primary{% endif %}"
-                    data-notification-id="{{ notif.id }}" onclick="markAsRead({{ notif.id }})">
+                    data-notification-id="{{ notif.id }}" onclick="markAsRead({{ notif.id }}); return true;">
                     <div class="d-flex w-100 justify-content-between align-items-start">
                         <div>
                             <div class="d-flex align-items-center mb-1">
@@ -56,14 +56,11 @@
     function updateBadgeCount(newCount) {
         const badge = document.querySelector('.nav-link .badge.bg-danger');
         if (newCount === 0) {
-            // Remove badge if no unread notifications
             if (badge) badge.remove();
         } else {
             if (badge) {
-                // Update existing badge
                 badge.textContent = newCount < 100 ? newCount : '99+';
             } else {
-                // Create badge if it doesn't exist
                 const bellLink = document.querySelector('.nav-link[href="{{ url_for("notification.notifications") }}"]');
                 if (bellLink) {
                     const newBadge = document.createElement('span');
@@ -79,47 +76,49 @@
 
     // Mark single notification as read
     function markAsRead(notificationId) {
-        fetch(`/api/notifications/${notificationId}/read`, {
+        fetch('/api/notifications/' + notificationId + '/read', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             }
-        }).then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Remove badge and highlight from notification
-                    const notifElement = document.querySelector(`[data-notification-id="${notificationId}"]`);
-                    if (notifElement) {
-                        notifElement.classList.remove('list-group-item-primary');
-                        const badge = notifElement.querySelector('.badge');
-                        if (badge) badge.remove();
-                    }
+        }).then(function (response) {
+            return response.json();
+        }).then(function (data) {
+            if (data.success) {
+                const notifElement = document.querySelector('[data-notification-id="' + notificationId + '"]');
+                if (notifElement) {
+                    notifElement.classList.remove('list-group-item-primary');
+                    const badge = notifElement.querySelector('.badge');
+                    if (badge) badge.remove();
+                }
 
-                    // Update badge count
-                    const currentUnread = {{ unread_count }
-                };
-                updateBadgeCount(currentUnread - 1);
-            }
-            });
-    }
+                // Update badge count
+                var currentUnread = {{ unread_count }
+            };
+            updateBadgeCount(currentUnread - 1);
+        }
+    });
+}
 
     // Mark all as read
-    document.getElementById('markAllRead')?.addEventListener('click', function (e) {
-        e.preventDefault();
-        fetch('/api/notifications/read-all', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        }).then(response => response.json())
-            .then(data => {
+    var markAllBtn = document.getElementById('markAllRead');
+    if (markAllBtn) {
+        markAllBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            fetch('/api/notifications/read-all', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            }).then(function (response) {
+                return response.json();
+            }).then(function (data) {
                 if (data.success) {
-                    // Update badge to 0
                     updateBadgeCount(0);
-                    // Reload to show updated UI
                     location.reload();
                 }
             });
-    });
+        });
+    }
 </script>
 {% endblock %}
